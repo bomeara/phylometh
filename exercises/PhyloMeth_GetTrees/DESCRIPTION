@@ -1,0 +1,10 @@
+Package: PhyloMeth_GetTrees
+Version: 1.0
+Date: 2015-09-12
+Title: PhyloMeth exercises for getting trees from elsewhere
+Author: Brian O'Meara <omeara.brian@gmail.com>
+Maintainer: Brian O'Meara <omeara.brian@gmail.com>
+Depends: ape, treebase, rotl
+Suggests: testthat, phylobase
+Description: This skeleton has code for you to fix to learn how to get trees
+License: GPL (>= 2)
