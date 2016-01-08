@@ -30,3 +30,28 @@ You will need a variety of software: **right now, R and git**; eventually, thing
 On a Mac, it is easiest to first install MacPorts (will help a lot with later steps): see [here](https://www.macports.org/install.php) for how to do that. Then install git. For Linux, you probably already know how to use a package manager. For Windows, there is a git installer, but you might consider something like cygwin as well.
 
 To **install R**, go to your preferred CRAN mirror to download it: I'd suggest https://cran.rstudio.com. What does all this mean? CRAN = Comprehensive R Archive Network: it's where a lot of R packages are stored and readied for installation. A mirror is a computer that stores a copy of files on another computer. This is an old school approach to creating redundancy and convenience: rather than every R user in the world trying to copy a file off of one computer's hard drive connected to the wall with one ethernet cable, there's a whole set of computers, often with one fairly close to the user and so with faster download speeds. However, these can have their own issues: some might not update their copies often (look at [this](https://cran.r-project.org/mirmon_report.html) to see some of these), some are slow, etc. A more modern approach is a content delivery network (CDN): a distributed set of servers, and a user is automatically routed to the best one for her or him given location, speed, server status, etc. When you watch a movie on Netflix, you're not using the same server as everyone else, for example. The R mirror I suggest you use is one run by the RStudio commercial company: it's actually a CDN and is secure and fast. Unlike the other R mirrors, it also records number of times each package is downloaded, which can be useful data for package authors.
+
+Once R is installed, it's time to install packages. Most packages are on CRAN, though an increasing number are just on R-Forge, GitHub, or other sites. (CRAN has volunteers who check packages thoroughly to make sure they install on a variety of operating systems, keep to modern coding standards, deal with licensing appropriately, etc. (they can't, of course, ensure that the statistical approaches are sound): this is great for users but some developers find it difficult, so put their packages elsewhere).
+
+One helpful way to navigate the array of R packages is through [task views](https://cran.r-project.org/web/views/): curated lists of packages. You can also **install all the packages in a view** and those they depend on. Do this:
+
+```
+install.packages("ctv") #the CRAN task view package
+```
+
+And then choose the packages to install. For this class, I'd suggest Phylogenetics and WebTechnologies:
+
+```
+library(ctv) #to load the package
+install.views(c("Phylogenetics", "WebTechnologies"))
+```
+
+Bioconductor is a separate repository with lots of packages for dealing with genetic data, especially nextgen data. To install this and a few initial packages:
+
+```
+source("http://bioconductor.org/biocLite.R")
+biocLite()
+biocLite("Biostrings")
+```
+
+
