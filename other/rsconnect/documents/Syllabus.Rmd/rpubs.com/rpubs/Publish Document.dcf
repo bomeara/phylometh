@@ -1,0 +1,7 @@
+name: Publish Document
+account: rpubs
+server: rpubs.com
+bundleId:
+        https://api.rpubs.com/api/v1/document/142643/985226b4a994484da663d5eb162a5aca
+url: http://rpubs.com/bomeara/142643
+when: 1452632275.38126

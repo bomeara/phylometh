@@ -1,0 +1,110 @@
+---
+output: html_document
+---
+## EEB603: Phylogenetic Methods (PhyloMeth). Spring 2016
+Syllabus version: `r format(Sys.time(), '%I:%M %p, %d %B, %Y')`
+
+Instructor: **[Brian O'Meara](http://www.brianomeara.info)** (bomeara@utk.edu)
+
+Course website: **http://phylometh.org**
+
+Office Hours (446 Hesler) by appointment.
+
+####Anonymous feedback
+http://www.brianomeara.info/feedback. This is the first time the course is being run, and it's taught in a very different way from most courses. There is a lot that will go wrong. Let me know what's not working while it can still improve.
+
+#### What you will learn
+This is a modern class in phylogenetic methods. You will learn how to get data, build a tree, use comparative methods, and how to make new methods. More importantly, you will learn _why_ to do all this.
+
+#### Requirements
+* A laptop on which you can install software (have root / admin access)
+    + It'll be easiest if this is a Mac; less easy is Linux; Windows will be hard
+* A question and some data to answer it
+* GitHub account
+* Gitter
+* R
+* And other software we'll learn about during the course
+
+#### Evaluation
+Grading will be based on effort. Some of the things will be harder for some students than others just given differences in what they've been exposed to so far, and I don't want to penalize students who are less skilled at R, for example. But I do require that you put in work on this class: work through the exercises, think about the papers, etc. Much of the homework is chewy, so it will take some thought to get through, and you might not be able to do all of this. That's ok.
+
+#### Teaching
+The class is flipped: rather than me droning at the front of the room, I'll be releasing videos online for you to watch. They will be linked to from this syllabus. In class, talk about what was not clear from the videos about methods, and we'll dig into that. We can also work on problematic parts of the exercises (you should do most of them before class) and talk about papers.
+
+#### Online option
+There is an online option, as well. In this first running of the class, I'm not seeking to give out credit, but online visitors are encouraged to sign up.
+
+### Schedule
+* Week 1, Jan 14
+    + Topic: Getting ready
+    + Items: R, github, gitter, unit testing
+    + Instructions: http://rpubs.com/bomeara/phylomethsoftwareinstall
+    + Exercise: [Getting Started](https://classroom.github.com/assignment-invitations/c28cc1d5a6c9e8151508df973ab23e70)
+
+
+* Week 2, Jan 21
+    + Topic: Gathering data
+    + Items: Sequences, trees, name resolution, alignment
+    + Exercise: [Get trees](https://classroom.github.com/assignment-invitations/c28cc1d5a6c9e8151508df973ab23e70)
+
+
+* Week 3, Jan 28
+    + Topic: Building trees
+    + Items: Likelihood; Bayes; Parsimony
+
+* Week 4, Feb 4
+    + Topic: Building trees
+    + Items: Gene tree species tree; Network
+
+
+* Week 5, Feb 11
+    + Topic: Dating trees
+    + Items: Beast, r8s
+
+
+* Week 6, Feb 18
+    + Topic: Correlating characters
+    + Items: independent contrasts, Pagel 1994, Hansen OU
+
+
+* Week 7, Feb 25
+    + Topic: Continuous character models
+    + Items: Surface, OUwie, geiger
+
+
+* Week 8, Mar 3
+    + Topic: Discrete character models
+    + Items: Pagel 1994, corHMM, geiger
+
+
+* Week 9, Mar 10
+    + Topic: Diversification models
+    + Items: Sister group comparisons, BAMM
+
+
+* Week 10, Mar 24
+    + Topic: SSE models
+    + Items: diversitree, hisse
+
+
+* Week 11, Mar 31
+    + Topic: Simulating data
+    + Items: TreeSim, geiger
+    
+* Week 12, Apr 7
+    + Topic: Building a new comparative method
+
+* Week 13, Apr 14
+    + Topic: Testing a new comparative method
+
+* Week 14, Apr 21
+    + Topic: Student choice
+
+* Week 11, April 28
+    + Topic: Student choice
+
+**Course made possible by**:  NSF CAREER grant to O'Meara & ongoing support from the Department of Ecology & Evolutionary Biology, U. of Tennessee, Knoxville.
+
+<p align="center">
+<img src="http://www.nsf.gov/images/logos/nsf1.jpg" alt="NSF" style="width: 50px;"/>                   <img src="http://tennessee.edu/static/identity/graphics/ut-wordmark-stacked-large.jpg" alt="UT" style="width: 150px;"/>
+</p>
