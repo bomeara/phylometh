@@ -1,6 +1,9 @@
 ---
 output: html_document
 ---
+The syllabus (mostly the schedule) will be updated throughout the semester. You can see it as a [PDF](https://github.com/bomeara/phylometh/raw/master/other/Syllabus.pdf) or [RMarkdown](https://github.com/bomeara/phylometh/blob/master/other/Syllabus.Rmd) file; I have also embedded it below.
+
+
 ## EEB603: Phylogenetic Methods (PhyloMeth). Spring 2016
 Syllabus version: `r format(Sys.time(), '%I:%M %p, %d %B, %Y')`
 
@@ -35,7 +38,7 @@ The class is flipped: rather than me droning at the front of the room, I'll be r
 There is an online option, as well. In this first running of the class, I'm not seeking to give out credit, but online visitors are encouraged to sign up.
 
 ### Schedule
-* Week 1, Jan 14
+* [Week 1, Jan 14](http://www.phylometh.org/2016/01/week-1-getting-started/)
     + Topic: Getting ready
     + Items: R, github, gitter, unit testing
     + Instructions: http://rpubs.com/bomeara/phylomethsoftwareinstall
@@ -104,7 +107,3 @@ There is an online option, as well. In this first running of the class, I'm not 
     + Topic: Student choice
 
 **Course made possible by**:  NSF CAREER grant to O'Meara & ongoing support from the Department of Ecology & Evolutionary Biology, U. of Tennessee, Knoxville.
-
-<p align="center">
-<img src="http://www.nsf.gov/images/logos/nsf1.jpg" alt="NSF" style="width: 50px;"/>                   <img src="http://tennessee.edu/static/identity/graphics/ut-wordmark-stacked-large.jpg" alt="UT" style="width: 150px;"/>
-</p>

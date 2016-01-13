@@ -1,7 +1,7 @@
 ---
 title: 'PhyloMeth: Getting Started'
 author: "Brian O'Meara"
-output: pdf_document
+output: html_document
 ---
 
 ##Objectives
@@ -46,6 +46,12 @@ library(ctv) #to load the package
 install.views(c("Phylogenetics", "WebTechnologies"))
 ```
 
+We will be using unit testing to check homework. For this, you will need to install the `testthat` package.
+
+```
+install.packages("testthat")
+```
+
 Bioconductor is a separate repository with lots of packages for dealing with genetic data, especially nextgen data. To install this and a few initial packages:
 
 ```
@@ -54,4 +60,6 @@ biocLite()
 biocLite("Biostrings")
 ```
 
+Once you have all this done, it is time to start the exercise:
+https://classroom.github.com/assignment-invitations/c28cc1d5a6c9e8151508df973ab23e70
 
