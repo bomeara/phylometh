@@ -1,0 +1,49 @@
+---
+title: 'PhyloMeth: RAxML'
+author: "Brian O'Meara"
+output: pdf_document
+---
+
+##Objectives
+By the end of this week, you will:
+
+* Have RAxML installed
+* Be able to do an analysis with likelihood with various models
+* Understand partitioning
+* Be able to use a variety of character types
+    
+RAxML (Stamatakis, 2014) is a very popular program for inferring phylogenies using likelihood, though there are many others. It is notable for being able to infer trees for tens of thousands of species or more. New versions can use DNA, amino acid, SNP, and/or morphological characters.
+
+To begin, **install RAxML**. Follow the instructions in Step 1 of http://sco.h-its.org/exelixis/web/software/raxml/hands_on.html. For the fewest issues, just do `make -f Makefile.gcc` on the command line (not in R) to compile the basic vanilla version. For actual work, you'll likely find the versions with SSE3 and/or PTHREADS will work faster. On a Mac (Linux is similar; RAxML has [binaries](https://github.com/stamatak/standard-RAxML/tree/master/WindowsExecutables_v8.2.4)), the easiest way to get use this would be:
+
+```
+git clone git@github.com:stamatak/standard-RAxML.git
+cd standard-RAxML
+make -f Makefile.gcc 
+```
+
+If compiling went correctly, you should see a line like
+```
+gcc  -o raxmlHPC axml.o  optimizeModel.o multiple.o searchAlgo.o topologies.o parsePartitions.o treeIO.o models.o bipartitionList.o rapidBootstrap.o evaluatePartialGenericSpecial.o evaluateGenericSpecial.o newviewGenericSpecial.o makenewzGenericSpecial.o   classify.o fastDNAparsimony.o fastSearch.o leaveDropping.o rmqs.o rogueEPA.o ancestralStates.o  mem_alloc.o  eigen.o -lm
+```
+
+**Now you need to put the program in a path.** This is where your computer looks for programs to run. If you type a program name, like `ls` or `raxmlHPC`, your computer checks the folders indicated in the path for a program of this name; when it finds one, it runs that. You can see your path by typing `echo $PATH`. If you want to run a program, like the newly compiled `raxmlHPC`, you have two options: you can specify where it is each time you want to run it, or you can put it in a folder in your existing path. The former becomes a pain, so I'd recommend the latter. `/usr/bin` is in your path, but this is reserved for programs your computer needs to run -- don't mess with it. I'd suggest putting it in `/usr/local/bin`. To do this, type
+
+```
+sudo cp raxmlHPC /usr/local/bin/raxmlHPC
+```
+
+`sudo` means superuser do. It's a very powerful command. Generally, typing on the command line you can delete files that are important to you, but it's hard to utterly destroy your computer; with superuser abilities, you could delete key files.
+
+![Sudo sandwich from xkcd](http://imgs.xkcd.com/comics/sandwich.png)
+
+Ok, so we now have RAxML installed. To run it, you could use the very handy `ips` package to call it from R, but it doesn't have an interface to all of the relevant commands. Instead, we're going to just create some commands to run ourselves.
+
+First, we need sample data sets. We will be using ones, modified somewhat, from [this tutorial](http://sco.h-its.org/exelixis/web/software/raxml/hands_on.html). The original files are [here](http://sco.h-its.org/exelixis/resource/download/hands-on/Hands-On.tar.bz2) but the modified ones are in the [repository for this PhyloMeth exercise](https://github.com/PhyloMeth/LikelihoodTrees) in the `/inst/extdata` folder.
+
+Until now, we've seen NEXUS files, which can include data blocks. RAxML uses Phylip-formatted files instead, which are simpler: a line that has the number of taxa and the number of sites, followed by one line per taxon with the taxon name, a space, and then the characters (though there could be interleaving). 
+
+First, we are going to examine morphology using likelihood. While morphology is typically analyzed with parsimony, there are models for morphology (Lewis 2001) and research suggests (Wright & Hillis, 2014) that such models outperform parsimony for morphology, in addition to being less prone (in theory) to long branch attraction (Felsenstein 1978). Therefore, absent strongly held concerns rooted in an [epistemological paradigm](http://onlinelibrary.wiley.com/doi/10.1111/cla.12148/full), it seems prudent to use a parametric model for morphology (note this can be done in likelihood or Bayesian contexts).
+
+References:
+A. Stamatakis: "RAxML Version 8: A tool for Phylogenetic Analysis and Post-Analysis of Large Phylogenies". In Bioinformatics, 2014, open access link: http://bioinformatics.oxfordjournals.org/content/early/2014/01/21/bioinformatics.btu033.abstract?keytype=ref&ijkey=VTEqgUJYCDcf0kP
