@@ -1,0 +1,42 @@
+---
+title: 'PhyloMeth: Gene Tree Species Tree'
+author: "Brian O'Meara"
+output: html_document
+---
+
+##Objectives
+By the end of this week, you will:
+
+* Understand why gene trees and species trees may not always agree
+* Know about some of the approaches in this area
+* Understand about phylogenetic networks
+    
+First, we will be looking at distinctions between gene trees and species trees. For this, we'll be using Liang Liu's phybase package. This isn't on CRAN, but it is available on his [website](https://faculty.franklin.uga.edu/lliu/content/phybase?). However, we'll be using a version I modified slightly and put on github. Liang's package uses [newick](http://evolution.genetics.washington.edu/phylip/newicktree.html) format (yes, named after the [restaurant](http://newicks.com)), but with additional options for including population size (branch width, included as a `#` sign followed by a number) as well as the more traditional branch length. Both matter for coalescence: two copies are much more likely to have coalesced on a long, narrow branch than a short, fat one. Most packages in R instead use ape's `phylo` format, so I wrote a few functions to deal with that. This version of the package is on github; to install it:
+
+```
+library(devtools)
+install_github("bomeara/phybase")
+```
+
+For real science, Liang's is the canonical one (and definitely cite his) but this will be easier for us to use for class. 
+
+First, get a tree from Open Tree of Life. We'll get a recent plant tree from Beaulieu et al:
+
+```{r}
+library(rotl)
+library(ape)
+phy <- get_study_tree("ot_485", "tree1")
+plot(phy, cex=0.5, type="fan")
+```
+
+We can simulate gene trees on this tree:
+```{r}
+library(phybase)
+gene.tree <- sim.coaltree.phylo(phy, pop.size=0.000001)
+plot(gene.tree, cex=0.5, type="fan")
+```
+
+And it probably looks very similar to the initial tree:
+```{r}
+cophyloplot(phy, gene.tree, cbind(sort(phy$tip.label), sort(gene.tree$tip.label)), show.tip.label=FALSE, type="cladogram")
+```
