@@ -23,3 +23,12 @@ To do this week's assignments, you will have to:
     - `library(devtools)`
     - `install_github("bomeara/geiger-v2")` (eventually I'll make a pull request)
  
+## BEAST 
+For the BEAST part, we're not going to do our testing via R package approach: dealing with file paths and such are too problematic. So we'll just go through an exercise, but unlike many canned tutorials, you'll have to figure out what to do at stages. Note that this is based on the [tutorial](https://github.com/CompEvol/beast2/blob/master/doc/tutorials/DivergenceDating/DivergenceDatingTutorialv2.0.3.pdf?raw=true) by Drummond, Rambaut, and Bouckaert.
+
+BEAST uses XML files for commands, rather than NEXUS files (though it does use NEXUS files for data). This XML format is different from [NeXML](http://www.nexml.org) and [PhyloXML](http://www.phyloxml.org), two other XML formats proposed for phylogenetics (though, as of now, they're still not used much in the field -- most students won't encounter them). These files are often made using the program BEAUTi (also from the BEAST developers) and then, sometimes, hand edited. 
+
+1. **Import primates-mtDNA.nex** into BEAUTi; it's includided in examples/nexus in the BEAST folder. Note it's File -> Import alignment.
+2. But wait -- what are you loading? Have you looked at the file? 
+2. 
+

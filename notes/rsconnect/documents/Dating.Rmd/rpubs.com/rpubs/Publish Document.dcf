@@ -3,6 +3,5 @@ account: rpubs
 server: rpubs.com
 bundleId:
         https://api.rpubs.com/api/v1/document/150444/5dc3ebb1705948ca82e8ebc985eed4fc
-url:
-        http://rpubs.com/publish/claim/150444/d1079fbd5dff4bc59330395ccc16dcac
-when: 1454584438.58855
+url: http://rpubs.com/bomeara/150444
+when: 1454603222.08832
