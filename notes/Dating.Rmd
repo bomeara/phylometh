@@ -29,6 +29,7 @@ For the BEAST part, we're not going to do our testing via R package approach: de
 BEAST uses XML files for commands, rather than NEXUS files (though it does use NEXUS files for data). This XML format is different from [NeXML](http://www.nexml.org) and [PhyloXML](http://www.phyloxml.org), two other XML formats proposed for phylogenetics (though, as of now, they're still not used much in the field -- most students won't encounter them). These files are often made using the program BEAUTi (also from the BEAST developers) and then, sometimes, hand edited. 
 
 1. **Import primates-mtDNA.nex** into BEAUTi; it's includided in examples/nexus in the BEAST folder. Note it's File -> Import alignment.
-2. But wait -- what are you loading? Have you looked at the file? 
-2. 
+2. But wait -- what are you loading? Have you looked at the file? Open it in a text editor (or R, or Mesquite) and look at it. Do you believe the sequences are aligned properly? Is there anything weird about them? This is an essential step.
+3. We will be partitioning, as with RAxML. This file already has some partitions, but some overlap (coding vs the three codon positions). Delete the coding partition using the `-` sign button on the bottom of the window.
 
+**more here**
