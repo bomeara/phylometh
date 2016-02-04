@@ -1,0 +1,25 @@
+---
+title: 'PhyloMeth: Dating'
+author: "Brian O'Meara"
+output: html_document
+---
+
+*Still in progress*
+
+##Objectives
+By the end of this week, you will:
+
+* Understand dating algorithms
+* Be able to use r8s and BEAST
+* Be afraid of calibrations
+
+Make sure to **read the relevant papers**: https://www.mendeley.com/groups/8111971/phylometh/papers/added/0/tag/week5/    
+
+To do this week's assignments, you will have to:
+
+* **Download and install r8s** from http://loco.biosci.arizona.edu/r8s/ 
+* **Download BEAST and Beauti** from http://beast.bio.ed.ac.uk
+* **Install a tweaked version of Geiger**
+    - `library(devtools)`
+    - `install_github("bomeara/geiger-v2")` (eventually I'll make a pull request)
+ 
