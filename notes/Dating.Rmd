@@ -4,8 +4,6 @@ author: "Brian O'Meara"
 output: html_document
 ---
 
-*Still in progress*
-
 ##Objectives
 By the end of this week, you will:
 
@@ -74,4 +72,22 @@ BEAST uses XML files for commands, rather than NEXUS files (though it does use N
 21. FigTree or R can be used to visualize the final tree with support.
 
 
-**more here**
+##r8s
+r8s implements several functions for converting a phylogram to a chronogram. It does the classic, Langley-Fitch molecular clock which stretches branches but assumes a constant rate for all. It also implements two algorithms by Sanderson: nonparametric rate smoothing (NPRS) and penalized likelihood (PL). Both relax the assumption of constant rate of evolution and instead allow rates to vary along the tree. NPRS tries to minimize rate changes at nodes. PL has a model for changes (to give likelihood of original branch lengths) and combines this with a nonparametric penalty for rate changes. It tries to minimize the combination of these two parameters, but there is a user-set penalty to decide the relative value of these in the combined sum. This is set by cross-validation: delete some data, estimate parameters, predict the deleted data, and see how close the deleted data are to the simulated data. In this case, the datum deleted is a single tip, and the length of this branch is the value to predict. This can now happen within r8s. In general, PL is more accurate than NPRS, but is slower (but both are much faster than BEAST). `treepl` is a later program that implements Sanderson's algorithms but can work on much larger trees.
+
+Jon Eastman coded an interface to this in Geiger, but it wasn't exposed to users. I've added some additional features (including an `ez.run` mode) and documentation to his code. This is now in a fork of Geiger, but I'll file a pull request soon to put it into the main code. For now, make sure you have installed the forked version:
+
+```
+devtools::install_github("bomeara/geiger-v2")
+library(geiger)
+```
+
+Then use the help for `?r8s.phylo` to figure out how to use this function. Also look at the [r8s manual](http://loco.biosci.arizona.edu/r8s/r8s1.7.manual.pdf) to understand the options.
+
+**Run the examples** in Geiger for this. You can also look at the examples that come with r8s.
+
+## Applying to your own work
+
+By this point in the course, you should be thirsting to apply these tools to your own questions. Do so! **Get a dataset (think back to the getting trees method), infer a tree (if needed), and date it using one of these approaches.** I'd advise making your own github repository for this. You could pay to keep it secret; I'd advise it's probably not worth it (there is some risk of being scooped, but it's pretty low) but it's your call. 
+
+
