@@ -1,0 +1,7 @@
+name: Publish Document
+account: rpubs
+server: rpubs.com
+bundleId:
+        https://api.rpubs.com/api/v1/document/153962/cdb6094dbeb84f9f89785b007dfd34c9
+url: http://rpubs.com/bomeara/153962/edit
+when: 1455807299.95692

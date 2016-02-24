@@ -1,0 +1,15 @@
+---
+title: 'PhyloMeth: Continuous Traits'
+author: "Brian O'Meara"
+output: html_document
+date: '`r format(Sys.time(), "Last updated %H:%M:%S %p %d %B, %Y")`'
+---
+
+
+
+##Objectives
+By the end of this week, you will:
+
+* Understand various continuous trait models
+
+Make sure to **read the relevant papers**: https://www.mendeley.com/groups/8111971/phylometh/papers/added/0/tag/week7/    
