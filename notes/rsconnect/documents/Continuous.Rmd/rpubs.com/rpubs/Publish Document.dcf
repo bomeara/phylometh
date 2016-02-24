@@ -1,8 +1,7 @@
 name: Publish Document
 account: rpubs
 server: rpubs.com
-bundleId:
-        https://api.rpubs.com/api/v1/document/155508/157f7aa0d46144d3b0a626396cd4b945
-url:
-        http://rpubs.com/publish/claim/155508/1f1c7f6f384c44859b2a26d885bded43
-when: 1456340027.04114
+appId: https://api.rpubs.com/api/v1/document/155508/157f7aa0d46144d3b0a626396cd4b945
+bundleId: https://api.rpubs.com/api/v1/document/155508/157f7aa0d46144d3b0a626396cd4b945
+url: http://rpubs.com/bomeara/155508
+when: 1456347027.58877
