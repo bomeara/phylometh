@@ -17,5 +17,5 @@ for (repo.index in sequence(length(repos))) {
 	print(cbind(rep(repo.name, length(status)), status, users))
 	all.results <- rbind(all.results, cbind(rep(repo.name, length(status)), status, users))
 	save(all.results, file="phylometh_progress.rda")
-	Sys.sleep(30)
+	Sys.sleep(10)
 }
