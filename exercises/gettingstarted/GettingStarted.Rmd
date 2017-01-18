@@ -96,7 +96,9 @@ Take the following lines and do what they say.
 
 MAKE THE FOLLOWING R CODE CREATE A PLOT IN THIS DOCUMENT
 
+```{r}
 plot(density(rnorm(1000)))
+```
 
 ### R exercise
 
