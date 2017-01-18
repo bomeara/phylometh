@@ -60,7 +60,11 @@ There is an online option, as well. In this second running of the class, I'm not
 
 * Week 2, Jan 19
     + Topic: Gathering data
+    + Reading: [Chapter 3](https://bookdown.org/bomeara/comparative-methods/getting-data-and-trees-into-r.html) of the textbook.
+    + Videos: See videos in this [playlist](https://www.youtube.com/playlist?list=PLrJfyqNDuTkMx_1OV_97S0jgdfmHfQ48x)
     + Items: Sequences, trees, name resolution, alignment
+    + Exercise: Getting trees: https://github.com/bomeara/phylometh/blob/master/exercises/gettingtreesanddata/exercise.R
+    + In class: Discussion of what kinds of data you need for your questions, what kind of trees you need.
 
 * Week 3, Jan 26
     + Topic: Building trees
