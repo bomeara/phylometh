@@ -52,11 +52,13 @@ The class is flipped: rather than me droning at the front of the room, I'll be r
 There is an online option, as well. In this second running of the class, I'm not seeking to give out credit, but online visitors are encouraged to sign up.
 
 ### Schedule
-* [Week 1, Jan 12](http://www.phylometh.org/2016/01/week-1-getting-started/)
-  + Topic: Getting ready
-  + Items: R, github, gitter, unit testing
-  + Instructions: http://rpubs.com/bomeara/phylomethsoftwareinstall
-  + Exercise: [Getting Started](https://bookdown.org/bomeara/GettingStarted/)
+
+* Week 1, Jan 12
+    + Topic: Getting ready
+    + Items: R, github, gitter, unit testing
+    + Instructions: http://rpubs.com/bomeara/phylomethsoftwareinstall
+    + Exercise: [Getting Started](https://github.com/bomeara/phylometh/blob/master/exercises/gettingstarted/GettingStarted.Rmd)
+    + One way to do the exercise is to fork the [github repo](https://github.com/bomeara/phylometh), clone it to your computer, start editing documents (such as those in `exercises/gettingstarted`), then `git commit -m"done homework" -a`, then do a pull request.
 
 * Week 2, Jan 19
     + Topic: Gathering data
