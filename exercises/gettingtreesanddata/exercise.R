@@ -6,6 +6,7 @@
 # a single tree for all life by creating essentially a supreme super tree.
 GetTreeFromOpenTree_solution <- function() {
 	library(rotl)
+	library(ape)
 	# Now let's look for the gecko genus Anolis
 	# Figure out the id used for Anolis in Open Tree's database
 
