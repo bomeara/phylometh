@@ -9,7 +9,7 @@ GetHowManyTrees <- function(ntaxa=10) {
 GetAlignment <- function() {
 	#Let's see where mafft is installed
 	library(ape)
-	print(system("/Applications/Mafft/mafft.bat"))
+	print(system("/usr/local/bin/mafft"))
 	data(woodmouse)
 	result <- ips::mafft(woodmouse)
 	return(result)
