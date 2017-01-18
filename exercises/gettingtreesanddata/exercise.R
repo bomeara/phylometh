@@ -41,8 +41,6 @@ GetTreeFromOpenTree_solution <- function() {
 	value="Anolis")
 	anolis.studies.ids <- anolis.studies$study_ids
 	
-	cat("\n\n\n");cat(anolis.studies.ids);cat("\n\n\n")
-
 	# Let's get info on the first study
 	anolis.study1.metadata <- get_study_meta(anolis.studies[[1]][[1]])
 	print(get_publication(anolis.study1.metadata))
