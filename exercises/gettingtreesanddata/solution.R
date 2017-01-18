@@ -1,4 +1,4 @@
-\# Let's get some trees from Open Tree of Life. This is in some ways a
+# Let's get some trees from Open Tree of Life. This is in some ways a
 # successor to TreeBASE: another repository of trees (though it has only partial
 # overlap with the trees in TreeBASE (or in another repository, Dryad). Unlike
 # TreeBASE, anyone, not just the author, can add trees to Open Tree's 
