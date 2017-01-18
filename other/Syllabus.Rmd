@@ -1,7 +1,7 @@
 ---
 output:
-  pdf_document: default
   html_document: default
+  pdf_document: default
 ---
 The syllabus (mostly the schedule) will be updated throughout the semester. You can see it as a [PDF](https://github.com/bomeara/phylometh/raw/master/other/Syllabus.pdf) or [RMarkdown](https://github.com/bomeara/phylometh/blob/master/other/Syllabus.Rmd) file; I have also embedded it below.
 
@@ -60,6 +60,8 @@ There is an online option, as well. In this second running of the class, I'm not
 
 * Week 2, Jan 19
     + Topic: Gathering data
+    + Reading: [Chapter 3](https://bookdown.org/bomeara/comparative-methods/getting-data-and-trees-into-r.html) of the textbook.
+    + Videos: See videos in this [playlist](https://www.youtube.com/playlist?list=PLrJfyqNDuTkMx_1OV_97S0jgdfmHfQ48x)
     + Items: Sequences, trees, name resolution, alignment
 
 * Week 3, Jan 26
