@@ -11,7 +11,7 @@ GetTreeFromOpenTree_solution <- function()
               "% resolved", sep=""))
   anolis.studies <- studies_find_studies(property="ot:focalCladeOTTTaxonName",
                                          value="Anolis")
-  anolis.studies.ids <- unlist(anolis.studies$matched_studies)	
+  anolis.studies.ids <- unlist(anolis.studies$study_ids)	
   anolis.study1.metadata <- get_study_meta(anolis.studies[[1]][[1]])
   print(get_publication(anolis.study1.metadata))
   
