@@ -2,7 +2,7 @@
 
 GetHowManyTrees <- function(ntaxa=10) {
 	#ape can compute this for us.
-	result <- ___SOME FUNCTION WITH AN ARGUMENT_____
+    result <- ape::howmanytrees(ntaxa)
 	return(result)
 }
 
@@ -14,5 +14,3 @@ GetAlignment <- function() {
 	result <- ips::mafft(____SOME INPUT ARGUMENT____)
 	return(result)
 }
-
-a
