@@ -40,7 +40,7 @@ GetTreeFromOpenTree_solution <- function() {
 	# Open Tree can also return the original studies with the source trees.
 	anolis.studies <- studies_find_studies(property="ot:focalCladeOTTTaxonName",
 	value="Anolis")
-	anolis.studies.ids <- unlist(anolis.studies$matched_studies)
+	anolis.studies.ids <- unlist(anolis.studies$study_ids)
 	
 	# Let's get info on the first study
 	anolis.study1.metadata <- get_study_meta(anolis.studies[[1]][[1]])
