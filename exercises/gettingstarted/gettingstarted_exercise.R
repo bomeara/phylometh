@@ -11,6 +11,6 @@ GetAlignment <- function() {
 	library(ape)
 	print(system("which mafft"))
 	data(woodmouse)
-	result <- ips::mafft(____SOME INPUT ARGUMENT____)
+	result <- ips::mafft(woodmouse)
 	return(result)
 }
