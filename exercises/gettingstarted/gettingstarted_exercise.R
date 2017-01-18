@@ -14,3 +14,5 @@ GetAlignment <- function() {
 	result <- ips::mafft(____SOME INPUT ARGUMENT____)
 	return(result)
 }
+
+a
