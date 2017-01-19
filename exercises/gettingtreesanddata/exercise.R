@@ -1,24 +1,29 @@
-\# Let's get some trees from Open Tree of Life. This is in some ways a
+
+# Let's get some trees from Open Tree of Life. This is in some ways a
 # successor to TreeBASE: another repository of trees (though it has only partial
 # overlap with the trees in TreeBASE (or in another repository, Dryad). Unlike
 # TreeBASE, anyone, not just the author, can add trees to Open Tree's 
 # repository. Another important distinction is that Open Tree seeks to create
 # a single tree for all life by creating essentially a supreme super tree.
-GetTreeFromOpenTree_solution <- function() {
-	library(rotl)
+install.packages("ctv")
+library(ctv)
+install.views(c("Phylogenetics", "Webtechnologies"))
+GetTreeFromOpenTree_solution <- function()
+library(rotl)
+library(ape)
 	# Now let's look for the gecko genus Anolis
 	# Figure out the id used for Anolis in Open Tree's database
 
 	# Replace the "__________" with appropriate arguments
-	
-	anolis.id <- tnrs_match_names("__________")$ott_id
-	
+
+	anolis.id <- tnrs_match_names("Anolis")$ott_id
+
 	# Now get Open Tree's current best estimate of the phylogeny for the group
 	# They call this the tree of life; we can get the subtree for just this group.
 	anolis.tree <- tol_subtree(ott_id=anolis.id)
 	
 	# Let's plot the tree:
-	plot.phylo("__________", type="fan", cex=0.2)
+	plot.phylo(anolis.tree, type="fan", cex=0.2)
 	
 	# It has a lot of polytomies, representing uncertainty. A maximally resolved
 	# tree (if rooted) will have one fewer internal nodes than terminal nodes:
@@ -38,17 +43,18 @@ GetTreeFromOpenTree_solution <- function() {
 	# Open Tree can also return the original studies with the source trees.
 	anolis.studies <- studies_find_studies(property="ot:focalCladeOTTTaxonName",
 	value="Anolis")
-	anolis.studies.ids <- unlist(anolis.studies$matched_studies)
+	anolis.studies.ids <- unlist(anolis.studies$study_ids)
 	
 	# Let's get info on the first study
-	anolis.study1.metadata <- get_study_meta(anolis.studies[[1]][[1]])
+anolis.study1.metadata <- get_study_meta(anolis.studies[[1]][[1]])
 	print(get_publication(anolis.study1.metadata))
 	
 	# And let's get the tree from this study
 	# Look in rotl documentation for the right function
 	# Hint: get_study_trees() is close, but you don't know the tree.id
-	anolis.study1.tree1 <- get_______FUNCTION_FROM_rotl____(anolis.studies.ids[[1]])
-	
+library(rotl)
+anolis.study1.tree1 <- get_study(anolis.studies.ids[[1]])
+
 	# And plot it
 	plot.phylo(anolis.study1.tree1, type="fan", cex=0.2)
 	
@@ -56,4 +62,3 @@ GetTreeFromOpenTree_solution <- function() {
 	return.list <- list(anolis.tree, anolis.study1.tree1)
 	names(return.list) <- c("tol.tree", "study1.tree")
 	return(return.list)
-}
