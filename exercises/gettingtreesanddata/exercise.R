@@ -12,14 +12,14 @@ GetTreeFromOpenTree_solution <- function() {
 
 	# Replace the "__________" with appropriate arguments
 	
-	anolis.id <- tnrs_match_names("__________")$ott_id
+	anolis.id <- tnrs_match_names("anolis")$ott_id
 	
 	# Now get Open Tree's current best estimate of the phylogeny for the group
 	# They call this the tree of life; we can get the subtree for just this group.
 	anolis.tree <- tol_subtree(ott_id=anolis.id)
 	
 	# Let's plot the tree:
-	plot.phylo("__________", type="fan", cex=0.2)
+	plot.phylo(anolis.tree, type="fan", cex=0.2)
 	
 	# It has a lot of polytomies, representing uncertainty. A maximally resolved
 	# tree (if rooted) will have one fewer internal nodes than terminal nodes:
@@ -48,7 +48,7 @@ GetTreeFromOpenTree_solution <- function() {
 	# And let's get the tree from this study
 	# Look in rotl documentation for the right function
 	# Hint: get_study_trees() is close, but you don't know the tree.id
-	anolis.study1.tree1 <- get_______FUNCTION_FROM_rotl____(anolis.studies.ids[[1]])
+	anolis.study1.tree1 <- get_study(anolis.studies.ids[[1]])
 	
 	# And plot it
 	plot.phylo(anolis.study1.tree1, type="fan", cex=0.2)
@@ -58,3 +58,5 @@ GetTreeFromOpenTree_solution <- function() {
 	names(return.list) <- c("tol.tree", "study1.tree")
 	return(return.list)
 }
+
+#testing
