@@ -1,4 +1,4 @@
-\# Let's get some trees from Open Tree of Life. This is in some ways a
+# Let's get some trees from Open Tree of Life. This is in some ways a
 # successor to TreeBASE: another repository of trees (though it has only partial
 # overlap with the trees in TreeBASE (or in another repository, Dryad). Unlike
 # TreeBASE, anyone, not just the author, can add trees to Open Tree's 
@@ -6,6 +6,7 @@
 # a single tree for all life by creating essentially a supreme super tree.
 GetTreeFromOpenTree_solution <- function() {
 	library(rotl)
+	library(ape)
 	# Now let's look for the gecko genus Anolis
 	# Figure out the id used for Anolis in Open Tree's database
 
@@ -38,7 +39,7 @@ GetTreeFromOpenTree_solution <- function() {
 	# Open Tree can also return the original studies with the source trees.
 	anolis.studies <- studies_find_studies(property="ot:focalCladeOTTTaxonName",
 	value="Anolis")
-	anolis.studies.ids <- unlist(anolis.studies$matched_studies)
+	anolis.studies.ids <- unlist(anolis.studies$study_ids)
 	
 	# Let's get info on the first study
 	anolis.study1.metadata <- get_study_meta(anolis.studies[[1]][[1]])
