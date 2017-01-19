@@ -104,7 +104,7 @@ plot(density(rnorm(1000)))
 
 Edit gettingstarted_exercise.R and this document so that this code all runs properly in this document. You will need to change `eval=FALSE` to `eval=TRUE` within the curly brackets:
 
-```(r eval=TRUE)
+```{r eval=TRUE}
 library(ape)
 library(ips)
 source("gettingstarted_exercise.R")
