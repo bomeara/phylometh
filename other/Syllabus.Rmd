@@ -14,7 +14,7 @@ Syllabus version: `r format(Sys.time(), '%I:%M %p, %d %B, %Y')`
 
 Instructor: **[Brian O'Meara](http://www.brianomeara.info)** (bomeara@utk.edu)
 
-Course website: **http://phylometh.org**
+Course website: http://phylometh.org
 
 Office Hours (446 Hesler) by appointment.
 
@@ -70,13 +70,19 @@ There is an online option, as well. In this second running of the class, I'm not
 
 * Week 3, Jan 26
     + Topic: Building trees
-    + Videos: [Terminology](https://www.youtube.com/watch?v=XSp1gEKNuIo), [Tree space](https://www.youtube.com/watch?v=SQw9ZWFp178)
+    + Videos: [Terminology](https://www.youtube.com/watch?v=XSp1gEKNuIo), [Tree space](https://www.youtube.com/watch?v=SQw9ZWFp178), [Likelihood vs Bayes](https://youtu.be/xOADfntkBrs)
     + Reading
         + [Felsenstein 1978](https://www.mendeley.com/catalog/cases-parsimony-compatibility-methods-positively-misleading/)
-        + [Felsenstein 1985](https://www.mendeley.com/catalog/confidence-limits-phylogenies-approach-using-bootstrap-55/
+        + [Felsenstein 1985](https://www.mendeley.com/catalog/confidence-limits-phylogenies-approach-using-bootstrap-55/)
         + [Lewis 2001](https://www.mendeley.com/catalog/phylogenetic-systematics-turns-new-leaf/)
-        + [Drummond & Rambaut 2007 https://www.mendeley.com/catalog/beast-bayesian-evolutionary-analysis-sampling-trees-1/)
+        + [Drummond & Rambaut 2007](https://www.mendeley.com/catalog/beast-bayesian-evolutionary-analysis-sampling-trees-1/)
     + Items: Likelihood; Bayes; Parsimony
+    + Potential exercises (choose your own)
+        + [RAxML tutorial](http://sco.h-its.org/exelixis/web/software/raxml/hands_on.html): Fast maximum likelihood tree inference program.
+        + [RevBayes tutorials](https://revbayes.github.io/tutorials.html): Bayesian program with many different models.
+        + [BEAST tutorials](http://treethinkers.org/tutorials/divergence-time-estimation-using-beast/): Bayesian tree inference program, especially used for getting chronograms.
+        + [Cyverse discovery environment](https://de.cyverse.org/de/): Free service (thanks, NSF!) for running phylogenetic (and other) software
+        
 
 * Week 4, Feb 2
     + Topic: Building trees
