@@ -14,7 +14,7 @@ Syllabus version: `r format(Sys.time(), '%I:%M %p, %d %B, %Y')`
 
 Instructor: **[Brian O'Meara](http://www.brianomeara.info)** (bomeara@utk.edu)
 
-Course website: **http://phylometh.org**
+Course website: http://phylometh.org
 
 Office Hours (446 Hesler) by appointment.
 
