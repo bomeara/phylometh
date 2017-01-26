@@ -73,9 +73,9 @@ There is an online option, as well. In this second running of the class, I'm not
     + Videos: [Terminology](https://www.youtube.com/watch?v=XSp1gEKNuIo), [Tree space](https://www.youtube.com/watch?v=SQw9ZWFp178)
     + Reading
         + [Felsenstein 1978](https://www.mendeley.com/catalog/cases-parsimony-compatibility-methods-positively-misleading/)
-        + [Felsenstein 1985](https://www.mendeley.com/catalog/confidence-limits-phylogenies-approach-using-bootstrap-55/
+        + [Felsenstein 1985](https://www.mendeley.com/catalog/confidence-limits-phylogenies-approach-using-bootstrap-55/)
         + [Lewis 2001](https://www.mendeley.com/catalog/phylogenetic-systematics-turns-new-leaf/)
-        + [Drummond & Rambaut 2007 https://www.mendeley.com/catalog/beast-bayesian-evolutionary-analysis-sampling-trees-1/)
+        + [Drummond & Rambaut 2007](https://www.mendeley.com/catalog/beast-bayesian-evolutionary-analysis-sampling-trees-1/)
     + Items: Likelihood; Bayes; Parsimony
 
 * Week 4, Feb 2
