@@ -1,7 +1,7 @@
 ---
 output:
-  pdf_document: default
   html_document: default
+  pdf_document: default
 ---
 The syllabus (mostly the schedule) will be updated throughout the semester. You can see it as a [PDF](https://github.com/bomeara/phylometh/raw/master/other/Syllabus.pdf) or [RMarkdown](https://github.com/bomeara/phylometh/blob/master/other/Syllabus.Rmd) file; I have also embedded it below.
 
@@ -87,6 +87,11 @@ There is an online option, as well. In this second running of the class, I'm not
 * Week 4, Feb 2
     + Topic: Building trees
     + Items: Gene tree species tree; Network
+    + Reading
+        + [Maddison 1997](https://doi.org/10.1093/sysbio/46.3.523): Gene trees in species trees
+        + [Heled & Drummond 2009](https://doi.org/10.1093/molbev/msp274): A method for inferring species trees given gene trees inside them
+        + [Degnan & Rosenberg 2000](http://dx.doi.org/10.1016/j.tree.2009.01.009): Cases where the most frequent gene tree does not match the species tree
+      
 
 
 * Week 5, Feb 9
