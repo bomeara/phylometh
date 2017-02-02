@@ -1,7 +1,7 @@
 ---
 output:
-  pdf_document: default
   html_document: default
+  pdf_document: default
   word_document: default
 ---
 The syllabus (mostly the schedule) will be updated throughout the semester. You can see it as a [PDF](https://github.com/bomeara/phylometh/raw/master/other/Syllabus.pdf) or [RMarkdown](https://github.com/bomeara/phylometh/blob/master/other/Syllabus.Rmd) file; I have also embedded it below. This site sometimes takes some time to refresh: you can also see the syllabus [here](http://rpubs.com/bomeara/phylomethsyllabus).
@@ -93,10 +93,13 @@ There is an online option, as well. In this second running of the class, I'm not
         + [Heled & Drummond 2009](https://doi.org/10.1093/molbev/msp274): A method for inferring species trees given gene trees inside them
         + [Degnan & Rosenberg 2000](http://dx.doi.org/10.1016/j.tree.2009.01.009): Cases where the most frequent gene tree does not match the species tree
         + [Solís-Lemus & Cécile Ané, 2016](http://dx.doi.org/10.1371/journal.pgen.1005896): Phylogenetic networks. A bit mathy for many students in this class, but worth introducing quartets, reticulation, and an existing method.
+    + Class exercise: [R Markdown](https://raw.githubusercontent.com/bomeara/ComparativeMethodsInR/master/95_GeneTreeSpeciesTree.Rmd)
 
 * Week 5, Feb 9
     + Topic: Dating trees
     + Items: Beast, r8s
+    + Reading
+        
 
 
 * Week 6, Feb 16
