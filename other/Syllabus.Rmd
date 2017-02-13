@@ -60,6 +60,7 @@ There is an online option, as well. In this second running of the class, I'm not
     + Instructions: http://rpubs.com/bomeara/phylomethsoftwareinstall
     + Exercise: [Getting Started](https://github.com/bomeara/phylometh/blob/master/exercises/gettingstarted/GettingStarted.Rmd)
     + One way to do the exercise is to fork the [github repo](https://github.com/bomeara/phylometh), clone it to your computer, start editing documents (such as those in `exercises/gettingstarted`), then `git commit -m"done homework" -a`, then do a pull request.
+    + [Recorded class](https://www.youtube.com/watch?v=D_AXmSIvgr0&t=1s)
 
 * Week 2, Jan 19
     + Topic: Gathering data
@@ -68,6 +69,7 @@ There is an online option, as well. In this second running of the class, I'm not
     + Items: Sequences, trees, name resolution, alignment
     + Exercise: Getting trees: https://github.com/bomeara/phylometh/blob/master/exercises/gettingtreesanddata/exercise.R
     + In class: Discussion of what kinds of data you need for your questions, what kind of trees you need.
+    + [Recorded class](https://www.youtube.com/watch?v=KQNppZctCNI)
 
 * Week 3, Jan 26
     + Topic: Building trees
@@ -83,6 +85,7 @@ There is an online option, as well. In this second running of the class, I'm not
         + [RevBayes tutorials](https://revbayes.github.io/tutorials.html): Bayesian program with many different models.
         + [BEAST tutorials](http://treethinkers.org/tutorials/divergence-time-estimation-using-beast/): Bayesian tree inference program, especially used for getting chronograms.
         + [Cyverse discovery environment](https://de.cyverse.org/de/): Free service (thanks, NSF!) for running phylogenetic (and other) software
+    + [Recorded class](https://www.youtube.com/watch?v=0Vo9LJgRR0Y)
         
 
 * Week 4, Feb 2
@@ -94,6 +97,7 @@ There is an online option, as well. In this second running of the class, I'm not
         + [Degnan & Rosenberg 2000](http://dx.doi.org/10.1016/j.tree.2009.01.009): Cases where the most frequent gene tree does not match the species tree
         + [Solís-Lemus & Cécile Ané, 2016](http://dx.doi.org/10.1371/journal.pgen.1005896): Phylogenetic networks. A bit mathy for many students in this class, but worth introducing quartets, reticulation, and an existing method.
     + Class exercise: [R Markdown](https://raw.githubusercontent.com/bomeara/ComparativeMethodsInR/master/95_GeneTreeSpeciesTree.Rmd)
+    
 
 * Week 5, Feb 9
     + Topic: Dating trees
@@ -107,20 +111,29 @@ There is an online option, as well. In this second running of the class, I'm not
         + [Course book](https://bookdown.org/bomeara/comparative-methods/dating.html)
     + Exercise
         + [RevBayes](http://revbayes.github.io/tutorials.html) tutorials on dating. 
+    + [Recorded class](https://www.youtube.com/watch?v=FI2rcVLEu34)
 
 * Week 6, Feb 16
-    + Topic: Correlating characters
-    + Items: independent contrasts, Pagel 1994, Hansen OU
+    + Topic: Discrete character models
+    + Items: Pagel 1994, corHMM, geiger
+    + Video: [PhyloMeth discrete characters](https://youtu.be/0OWX6WMNQ3o?list=PLrJfyqNDuTkOzbZfsM_xIkNIBjF7zmVP4)
+    + Reading
+        + [Pagel, 1999](https://doi.org/10.1080/106351599260184): Ancestral state reconstruction
+        + [Lewis, 2001](https://doi.org/10.1080/106351501753462876): MKV model
+        + [O'Meara, 2012](https://doi.org/10.1146/annurev-ecolsys-110411-160331): Review of models
 
 
 * Week 7, Feb 23
     + Topic: Continuous character models
     + Items: Surface, OUwie, geiger
 
-
 * Week 8, Mar 2
-    + Topic: Discrete character models
-    + Items: Pagel 1994, corHMM, geiger
+    + Topic: Correlating characters
+    + Items: independent contrasts, Pagel 1994, Hansen OU
+    + Reading
+        + [Felsenstein, 1985](http://dx.doi.org/10.1086/284325): Independent contrasts
+        + [Pagel, 1994](http://dx.doi.org/10.1098/rspb.1994.0006): Pagel 94 correlation
+        
 
 
 * Week 9, Mar 9
