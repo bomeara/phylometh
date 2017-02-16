@@ -2,8 +2,9 @@
 output:
   pdf_document: default
   html_document: default
+  word_document: default
 ---
-The syllabus (mostly the schedule) will be updated throughout the semester. You can see it as a [PDF](https://github.com/bomeara/phylometh/raw/master/other/Syllabus.pdf) or [RMarkdown](https://github.com/bomeara/phylometh/blob/master/other/Syllabus.Rmd) file; I have also embedded it below.
+The syllabus (mostly the schedule) will be updated throughout the semester. You can see it as a [PDF](https://github.com/bomeara/phylometh/raw/master/other/Syllabus.pdf) or [RMarkdown](https://github.com/bomeara/phylometh/blob/master/other/Syllabus.Rmd) file; I have also embedded it below. This site sometimes takes some time to refresh: you can also see the syllabus [here](http://rpubs.com/bomeara/phylomethsyllabus).
 
 
 ## Phylogenetic Methods (PhyloMeth). Spring 2017
@@ -14,7 +15,7 @@ Syllabus version: `r format(Sys.time(), '%I:%M %p, %d %B, %Y')`
 
 Instructor: **[Brian O'Meara](http://www.brianomeara.info)** (bomeara@utk.edu)
 
-Course website: **http://phylometh.org**
+Course website: http://phylometh.org
 
 Office Hours (446 Hesler) by appointment.
 
@@ -59,6 +60,7 @@ There is an online option, as well. In this second running of the class, I'm not
     + Instructions: http://rpubs.com/bomeara/phylomethsoftwareinstall
     + Exercise: [Getting Started](https://github.com/bomeara/phylometh/blob/master/exercises/gettingstarted/GettingStarted.Rmd)
     + One way to do the exercise is to fork the [github repo](https://github.com/bomeara/phylometh), clone it to your computer, start editing documents (such as those in `exercises/gettingstarted`), then `git commit -m"done homework" -a`, then do a pull request.
+    + [Recorded class](https://www.youtube.com/watch?v=D_AXmSIvgr0&t=1s)
 
 * Week 2, Jan 19
     + Topic: Gathering data
@@ -67,40 +69,71 @@ There is an online option, as well. In this second running of the class, I'm not
     + Items: Sequences, trees, name resolution, alignment
     + Exercise: Getting trees: https://github.com/bomeara/phylometh/blob/master/exercises/gettingtreesanddata/exercise.R
     + In class: Discussion of what kinds of data you need for your questions, what kind of trees you need.
+    + [Recorded class](https://www.youtube.com/watch?v=KQNppZctCNI)
 
 * Week 3, Jan 26
     + Topic: Building trees
-    + Videos: [Terminology](https://www.youtube.com/watch?v=XSp1gEKNuIo), [Tree space](https://www.youtube.com/watch?v=SQw9ZWFp178)
+    + Videos: [Terminology](https://www.youtube.com/watch?v=XSp1gEKNuIo), [Tree space](https://www.youtube.com/watch?v=SQw9ZWFp178), [Likelihood vs Bayes](https://youtu.be/xOADfntkBrs)
     + Reading
         + [Felsenstein 1978](https://www.mendeley.com/catalog/cases-parsimony-compatibility-methods-positively-misleading/)
-        + [Felsenstein 1985](https://www.mendeley.com/catalog/confidence-limits-phylogenies-approach-using-bootstrap-55/
+        + [Felsenstein 1985](https://www.mendeley.com/catalog/confidence-limits-phylogenies-approach-using-bootstrap-55/)
         + [Lewis 2001](https://www.mendeley.com/catalog/phylogenetic-systematics-turns-new-leaf/)
-        + [Drummond & Rambaut 2007 https://www.mendeley.com/catalog/beast-bayesian-evolutionary-analysis-sampling-trees-1/)
+        + [Drummond & Rambaut 2007](https://www.mendeley.com/catalog/beast-bayesian-evolutionary-analysis-sampling-trees-1/)
     + Items: Likelihood; Bayes; Parsimony
+    + Potential exercises (choose your own)
+        + [RAxML tutorial](http://sco.h-its.org/exelixis/web/software/raxml/hands_on.html): Fast maximum likelihood tree inference program.
+        + [RevBayes tutorials](https://revbayes.github.io/tutorials.html): Bayesian program with many different models.
+        + [BEAST tutorials](http://treethinkers.org/tutorials/divergence-time-estimation-using-beast/): Bayesian tree inference program, especially used for getting chronograms.
+        + [Cyverse discovery environment](https://de.cyverse.org/de/): Free service (thanks, NSF!) for running phylogenetic (and other) software
+    + [Recorded class](https://www.youtube.com/watch?v=0Vo9LJgRR0Y)
+        
 
 * Week 4, Feb 2
     + Topic: Building trees
     + Items: Gene tree species tree; Network
-
+    + Reading
+        + [Maddison 1997](https://doi.org/10.1093/sysbio/46.3.523): Gene trees in species trees
+        + [Heled & Drummond 2009](https://doi.org/10.1093/molbev/msp274): A method for inferring species trees given gene trees inside them
+        + [Degnan & Rosenberg 2000](http://dx.doi.org/10.1016/j.tree.2009.01.009): Cases where the most frequent gene tree does not match the species tree
+        + [Solís-Lemus & Cécile Ané, 2016](http://dx.doi.org/10.1371/journal.pgen.1005896): Phylogenetic networks. A bit mathy for many students in this class, but worth introducing quartets, reticulation, and an existing method.
+    + Class exercise: [R Markdown](https://raw.githubusercontent.com/bomeara/ComparativeMethodsInR/master/95_GeneTreeSpeciesTree.Rmd)
+    
 
 * Week 5, Feb 9
     + Topic: Dating trees
     + Items: Beast, r8s
-
+    + Reading
+        + [Sanderson, 2002](http://dx.doi.org/10.1093/oxfordjournals.molbev.a003974): Penalized likelihood.
+        + [Drummond et al. 2006](http://dx.doi.org/10.1371/journal.pbio.0040088): Bayesian dating. And good paper title.
+        + [Drummond and Rambaut, 2007](http://dx.doi.org/10.1186/1471-2148-7-214): BEAST description.
+        + [Beaulieu et al., 2015](http://dx.doi.org/10.1093/sysbio/syv027): One possible caveat to Bayesian dating.
+        + [Heath et al. 2015](http://www.pnas.org/content/111/29/E2957.short): Using fossils as tips.
+        + [Course book](https://bookdown.org/bomeara/comparative-methods/dating.html)
+    + Exercise
+        + [RevBayes](http://revbayes.github.io/tutorials.html) tutorials on dating. 
+    + [Recorded class](https://www.youtube.com/watch?v=FI2rcVLEu34)
 
 * Week 6, Feb 16
-    + Topic: Correlating characters
-    + Items: independent contrasts, Pagel 1994, Hansen OU
+    + Topic: Discrete character models
+    + Items: Pagel 1994, corHMM, geiger
+    + Video: [PhyloMeth discrete characters](https://youtu.be/0OWX6WMNQ3o?list=PLrJfyqNDuTkOzbZfsM_xIkNIBjF7zmVP4)
+    + Reading
+        + [Pagel, 1999](https://doi.org/10.1080/106351599260184): Ancestral state reconstruction
+        + [Lewis, 2001](https://doi.org/10.1080/106351501753462876): MKV model
+        + [O'Meara, 2012](https://doi.org/10.1146/annurev-ecolsys-110411-160331): Review of models
 
 
 * Week 7, Feb 23
     + Topic: Continuous character models
     + Items: Surface, OUwie, geiger
 
-
 * Week 8, Mar 2
-    + Topic: Discrete character models
-    + Items: Pagel 1994, corHMM, geiger
+    + Topic: Correlating characters
+    + Items: independent contrasts, Pagel 1994, Hansen OU
+    + Reading
+        + [Felsenstein, 1985](http://dx.doi.org/10.1086/284325): Independent contrasts
+        + [Pagel, 1994](http://dx.doi.org/10.1098/rspb.1994.0006): Pagel 94 correlation
+        
 
 
 * Week 9, Mar 9
@@ -110,6 +143,7 @@ There is an online option, as well. In this second running of the class, I'm not
 * Week 10, Mar 23
     + Topic: SSE models
     + Items: diversitree, hisse
+        + [Magallon and Sanderson, 2001](http://dx.doi.org/10.1554/0014-3820(2001)055[1762:ADRIAC]2.0.CO;2): As an empirical paper of ages, later work has improved on this, but it has extremely clear explanations of the math behind these methods.
 
 
 * Week 11, Mar 30
