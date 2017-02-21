@@ -1,7 +1,7 @@
 ---
 output:
-  html_document: default
   pdf_document: default
+  html_document: default
   word_document: default
 ---
 The syllabus (mostly the schedule) will be updated throughout the semester. You can see it as a [PDF](https://github.com/bomeara/phylometh/raw/master/other/Syllabus.pdf) or [RMarkdown](https://github.com/bomeara/phylometh/blob/master/other/Syllabus.Rmd) file; I have also embedded it below. This site sometimes takes some time to refresh: you can also see the syllabus [here](http://rpubs.com/bomeara/phylomethsyllabus).
@@ -131,6 +131,9 @@ There is an online option, as well. In this second running of the class, I'm not
         + [Hansen and Martins, 2006](http://www.jstor.org/stable/2410878): Linking micro and macroevolutionary models. TL;DR: Table 1 shows that many microevolutionary models reduce to Brownian motion.
         + [Felsenstein 1988](http://www.annualreviews.org/doi/abs/10.1146/annurev.es.19.110188.002305?journalCode=ecolsys.1): Biology behind the model.
         + [O'Meara, 2012](https://doi.org/10.1146/annurev-ecolsys-110411-160331): Not nearly as important as the ones above, but an intro to models that shows how I think.
+        + [Course Book](https://bookdown.org/bomeara/comparative-methods/brownian-motion-and-correlations.html)
+    + [Exercise](https://github.com/bomeara/phylometh/tree/master/exercises/continuous)
+
 
 * Week 8, Mar 2
     + Topic: Correlating characters
