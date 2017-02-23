@@ -76,7 +76,7 @@ First, we need to assign regimes. The way we do this is with ancestral state est
 
 ```{r, eval=FALSE}
 one.discrete.char <- _____________
-reconstruction.info <- ace(one.discrete.char, tree, type="discrete", method="ML", CI=FALSE)
+reconstruction.info <- ace(one.discrete.char, tree, type="discrete", method="ML", CI=TRUE)
 best.states <- colnames(reconstruction.info)[apply(reconstruction.info$lik.anc, 1, which.max)]
 ```
 
