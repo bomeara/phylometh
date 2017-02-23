@@ -15,23 +15,26 @@ library(OUwie)
 
 Now get the tree and data. For these exercises, knowing uncertainty in your measurements can also be important. (remember for homework to change `eval=FALSE` to `eval=TRUE`).
 
-```{r, eval=FALSE}
-tree <- read.tree("____PATH_TO_TREE_OR_SOME_OTHER_WAY_OF_GETTING_A_TREE____")
-continuous.data <- read.csv(file="____PATH_TO_DATA_OR_SOME_OTHER_WAY_OF_GETTING_TRAITS____", stringsAsFactors=FALSE) #death to factors.
+```{r, eval=TRUE}
+tree <- read.tree("Hydnum_bipartitions_060916.tre")
+continuous.data <- read.csv(file="contchar.csv", stringsAsFactors=FALSE) #death to factors.
+taxa2 <- continuous.data[,1]
+continuous.data <- continuous.data[,-1]
+names(continuous.data) <- taxa2
+continuous.data <- continuous.data[!is.na(continuous.data)]
 ```
 
 A function to clean data, make sure taxon names match between tree and data, etc. 
 
-```{r, eval=FALSE}
-CleanData <- function(phy, data) {
+```{r, eval=TRUE}
+ContCleanData <- treedata(tree, continuous.data) 
 	#treedata() in Geiger is probably my favorite function in R.
-}
 ```
 
 A function to plot data. Look at `phytools::contMap()`. This is all part of checking: do your data all seem sensible? **LOOK AT IT**.
 
 ```{r, eval=FALSE}
-VisualizeData <- function(phy, data) {
+ContVisualizeData <- function(phy, data) {
 	#Important here is to LOOK at your data before running it. Any weird values? Does it all make sense? What about your tree? Polytomies?
 }
 ```
