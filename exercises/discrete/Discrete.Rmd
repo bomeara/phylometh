@@ -5,9 +5,21 @@ date: "2/16/2017"
 output: html_document
 ---
 
+<<<<<<< HEAD
 **For this exercise, explore looking at discrete character models.**
+=======
+For this exercise, explore looking at discrete character models. Note: they are not "discreet" character models -- they're actually pretty noisy.
+>>>>>>> 6ac3e99c3eb398e2b4dc9b6cb7a2ccafe1eb652e
 
-Remember for homework, change `eval=TRUE` for all the R blocks, debug, commit, and do a pull request.
+Remember for homework, 
+
+`git remote -v` gives list of remotes
+
+`git fetch upstream`
+
+`git pull upstream master` pulls from upstream (me).
+
+change `eval=TRUE` for all the R blocks, debug, commit, and do a pull request.
 
 These are useful packages in this area (far from exhaustive list).
 
