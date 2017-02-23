@@ -7,9 +7,17 @@ output:
   pdf_document: default
 ---
 
-For this exercise, explore looking at discrete character models.
+For this exercise, explore looking at discrete character models. Note: they are not "discreet" character models -- they're actually pretty noisy.
 
-Remember for homework, change `eval=TRUE` for all the R blocks, debug, commit, and do a pull request.
+Remember for homework, 
+
+`git remote -v` gives list of remotes
+
+`git fetch upstream`
+
+`git pull upstream master` pulls from upstream (me).
+
+change `eval=TRUE` for all the R blocks, debug, commit, and do a pull request.
 
 These are useful packages in this area (far from exhaustive list).
 
@@ -90,9 +98,10 @@ Now, to the biological questions. For many of these, `corHMM` will be a useful p
 1. How can you estimate transition rates between states? Do it.
 ```{r, eval=TRUE}
 #cor.data <- cbind(row.names(CleanData$data),CleanData$data[,1])
-#cor.result <- corHMM(CleanData$phy, cor.data, rate.cat=1, node.states=c("marginal"))
+#cor.result <- corHMM(CleanData$phy, cor.data, rate.cat=1, node.states=c("joint"))
 #only works for 2 char. states instead of original 3
-cor.result1 <- corHMM(CleanData$phy, cor.data.fake, rate.cat=1, node.states=c("marginal"))
+cor.result1 <- corHMM(CleanData$phy, cor.data.fake, rate.cat=1, node.states=c("joint"))
+cor.result1
 ```
 
 2. How could you examine if transition rates are equal?
