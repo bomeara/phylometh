@@ -5,66 +5,101 @@ date: "2/20/2017"
 output: html_document
 ---
 
-First get packages we need
+**First get packages we need**
 
-```{r, eval=TRUE}
+```{r, eval=TRUE, warning=FALSE}
 library(ape) #utility fns
 library(geiger) #utilty fns
 library(OUwie)
+library("spocc")
+library(rotl)
 ```
 
-Now get the tree and data. For these exercises, knowing uncertainty in your measurements can also be important. (remember for homework to change `eval=FALSE` to `eval=TRUE`).
+**Now get the tree and data.** For these exercises, knowing uncertainty in your measurements can also be important. (remember for homework to change `eval=FALSE` to `eval=TRUE`).
 
-```{r, eval=FALSE}
-tree <- read.tree("____PATH_TO_TREE_OR_SOME_OTHER_WAY_OF_GETTING_A_TREE____")
-continuous.data <- read.csv(file="____PATH_TO_DATA_OR_SOME_OTHER_WAY_OF_GETTING_TRAITS____", stringsAsFactors=FALSE) #death to factors.
+```{r, eval=TRUE, warning=FALSE}
+## Tree taken from Blanchard, Benjamin D., Corrie S. Moreau. 2016. Defensive traits exhibit an evolutionary trade-off and drive diversification in ants. Evolution. doi = http://dx.doi.org/10.1111/evo.13117. Tree found on Open Tree of Life.
+
+ant.tree <- get_study_tree(study_id="ot_1000", tree_id="tree1", tip_label="ott_taxon_name")
+
+ant.species <- ant.tree$tip.label
+latitude <- NA
+for (i in 1:length(ant.species)){
+  speciesdat <- as.data.frame(occ2df(occ(query=ant.species[i], from="gbif", has_coords=TRUE, limit=10)))
+  latitude[i] <- mean(speciesdat[,3])
+}
+
+continuous.data <- cbind.data.frame(ant.species,latitude)
+rownames(continuous.data) <- continuous.data[,1]
+
 ```
 
 A function to clean data, make sure taxon names match between tree and data, etc. 
 
-```{r, eval=FALSE}
+```{r, eval=TRUE, warning=FALSE}
 CleanData <- function(phy, data) {
-	#treedata() in Geiger is probably my favorite function in R.
+  no.missing <- na.omit(data)
+  cleaned.data <- geiger::treedata(phy,no.missing)$data
 }
+
+CleanTree <- function(phy, data) {
+  no.missing <- na.omit(data)
+  cleaned.tree <- geiger::treedata(phy,no.missing)$phy
+}
+
+cleaned.continuous <- CleanData(ant.tree, continuous.data)
+cleaned.ant.tree <- CleanTree(ant.tree, continuous.data)
+
+cleaned.continuous <- as.data.frame(cleaned.continuous)
+cleaned.continuous$latitude <- as.numeric(as.character(cleaned.continuous$latitude))
+
 ```
 
 A function to plot data. Look at `phytools::contMap()`. This is all part of checking: do your data all seem sensible? **LOOK AT IT**.
 
-```{r, eval=FALSE}
+```{r, eval=TRUE,warning=FALSE}
+cleaned.data.vector <- cleaned.continuous[,2]
+names(cleaned.data.vector) <- rownames(cleaned.continuous)
+phytools::contMap(cleaned.ant.tree,cleaned.data.vector)
+
 VisualizeData <- function(phy, data) {
-	#Important here is to LOOK at your data before running it. Any weird values? Does it all make sense? What about your tree? Polytomies?
+  plot(phy,show.tip.label = FALSE)
+  return(c("The minimum latitude is", min(data), "and the maximum latitude is", max(data)))
 }
 ```
 
-First, start basic. What is the rate of evolution of your trait on the tree? 
+**First, start basic. What is the rate of evolution of your trait on the tree? **
 
-```{r, eval=FALSE}
-BM1 <- geiger::fitContinuous(tree, cleaned.continuous, model="BM")
-print(paste("The rate of evolution is", _____, "in units of", _______))
+```{r, eval=TRUE}
+BM1 <- geiger::fitContinuous(cleaned.ant.tree, cleaned.data.vector, model="BM")
+print(paste("The rate of evolution is", BM1$opt$sigsq, "in units of darwins"))
 ```
 
-Important: What are the rates of evolution? In what units?
+*Important: What are the rates of evolution? In what units?*
+The rate of evolution of latitude is 7.55 darwins, which describes a unit change in trait over a million years. 
 
 
-```{r, eval=FALSE}
-OU1 <- fitContinuous(tree, cleaned.continuous, model="OU")
-par(mfcol(c(1,2)))
-plot(tree, show.tip.label=FALSE)
-ou.tree <- rescale(tree, model="OU", ___alpha____)
-plot(ou.tree)
+```{r, eval=TRUE}
+OU1 <- fitContinuous(cleaned.ant.tree, cleaned.data.vector, model="OU")
+par(mfcol=(c(1,2)))
+plot(cleaned.ant.tree, show.tip.label=FALSE)
+ou.tree <- rescale(cleaned.ant.tree, model="OU", OU1$opt$alpha)
+plot(ou.tree, show.tip.label=FALSE)
 ```
 
-How are the trees different?
+*How are the trees different?*
+The branch lengths of the scaled tree using the OU model are much longer leading to the tips of the trees
 
-Compare trees
+*Compare trees*
 
-```{r, eval=FALSE}
-AIC.BM1 <- ________FIGURE_OUT_HOW_TO_DO_THIS_____
-AIC.OU1 <- ________FIGURE_OUT_HOW_TO_DO_THIS_____
-delta.AIC.BM1 <- ________FIGURE_OUT_HOW_TO_DO_THIS_____
-delta.AIC.OU1 <- ________FIGURE_OUT_HOW_TO_DO_THIS_____
+```{r, eval=TRUE}
+AIC.BM1 <- BM1$opt$aic
+AIC.OU1 <- OU1$opt$aic
+
+best.model.AIC <- min(AIC.BM1,AIC.OU1)
+delta.AIC.BM1 <- AIC.BM1 - best.model.AIC
+delta.AIC.OU1 <- AIC.OU1 - best.model.AIC
 ```
-
 
 ##OUwie runs##
 

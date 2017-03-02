@@ -35,7 +35,7 @@ library("spocc")
 **You'll need to get data into R in some way.** 
 
 ```{r, eval=TRUE}
-tree <- ape::read.nexus(file='C:/Users/maggi/Desktop/beetleoutputtree')
+tree.beetles <- ape::read.nexus(file='C:/Users/maggi/Desktop/beetleoutputtree')
 ### A 17 species tree of Onthophagus species, European species
 species <- gsub("O._", "Onthophagus ", tree$tip.label)
 ### A list of species on tree tips
@@ -94,7 +94,7 @@ CleanTree <- function(phy, data) {
 }
 
 cleaned.discrete <- CleanData(tree,discrete.data)
-cleaned.tree <- CleanTree(tree,discrete.data)
+cleaned.tree.beetles <- CleanTree(tree.beetles,discrete.data)
 
 ```
 
@@ -115,7 +115,7 @@ VisualizeData <- function(phy, data) {
   return(c(rightspecies, missingtable))
 }
 
-VisualizeData(cleaned.tree,cleaned.discrete)
+VisualizeData(cleaned.tree.beetles,cleaned.discrete)
 
 # I visualize my data through bar graphs that tell the number of occurance of each discrete state. I also visualize the tree. I return whether the data and the tree contain the same number of species. I also return the number of missing data for each data set.
     
@@ -171,9 +171,9 @@ Uncertainty in maximum liklihood means that there is uncertainty in our estimate
 ### Estimates transition rates between all three characters (climate, invasiveness in US, and color).
 edited.cleaned.discrete <- cbind(rownames(cleaned.discrete), cleaned.discrete)
 
-rayDISC(cleaned.tree, edited.cleaned.discrete[,1:2], node.states="marginal")
-rayDISC(cleaned.tree, edited.cleaned.discrete[,c(1,3)], node.states="marginal")
-rayDISC(cleaned.tree, edited.cleaned.discrete[,c(1,4)], node.states="marginal")
+rayDISC(cleaned.tree.beetles, edited.cleaned.discrete[,1:2], node.states="marginal")
+rayDISC(cleaned.tree.beetles, edited.cleaned.discrete[,c(1,3)], node.states="marginal")
+rayDISC(cleaned.tree.beetles, edited.cleaned.discrete[,c(1,4)], node.states="marginal")
 ```
 *2. How could you examine if transition rates are equal?*
 The above functions returns a matrix with transition rates from a-->b and b-->a ("a" and "b" are two states of an example character). If the rates in both directions are of equal value, we can see if the transition rates are equal. For all three of the characters examine, the transition rates between states are equal. 
@@ -183,9 +183,9 @@ The above functions returns a matrix with transition rates from a-->b and b-->a 
 All of my traits are variable. Using a Lewis MKV model may make sense for this data because this model tries to correct for bias introduced by only using variable traits to estimate branch length (Lewis 2001). 
 
 ```{r, eval = TRUE}
-MKVmodel.tree <- lewisMkv(cleaned.tree, edited.cleaned.discrete)$phy
+MKVmodel.tree <- lewisMkv(cleaned.tree.beetles, edited.cleaned.discrete)$phy
 par(mfrow=c(1,2))
-plot(cleaned.tree,main="Original Tree")
+plot(cleaned.tree.beetles,main="Original Tree")
 plot(MKVmodel.tree, main="MKV Model")
 ```
 
