@@ -4,7 +4,7 @@ You can do this on your own data, or on included data here.
 
 ##Continuous data
 
-```{r, eval=FALSE}
+```{r, eval=TRUE}
 library(geiger)
 library(pic)
 tree.primates <- read.tree(text="((((Homo:0.21,Pongo:0.21):0.28,Macaca:0.49):0.13,Ateles:0.62):0.38,Galago:1.00);") #using examples from ape ?pic
