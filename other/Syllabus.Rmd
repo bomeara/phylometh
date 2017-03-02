@@ -1,7 +1,7 @@
 ---
 output:
-  pdf_document: default
   html_document: default
+  pdf_document: default
   word_document: default
 ---
 The syllabus (mostly the schedule) will be updated throughout the semester. You can see it as a [PDF](https://github.com/bomeara/phylometh/raw/master/other/Syllabus.pdf) or [RMarkdown](https://github.com/bomeara/phylometh/blob/master/other/Syllabus.Rmd) file; I have also embedded it below. This site sometimes takes some time to refresh: you can also see the syllabus [here](http://rpubs.com/bomeara/phylomethsyllabus).
@@ -143,6 +143,8 @@ There is an online option, as well. In this second running of the class, I'm not
         + [Felsenstein, 1985](http://dx.doi.org/10.1086/284325): Independent contrasts
         + [Pagel, 1994](http://dx.doi.org/10.1098/rspb.1994.0006): Pagel 94 correlation
         + [Maddison & FitzJohn, 2015](https://academic.oup.com/sysbio/article-lookup/doi/10.1093/sysbio/syu070): A big problem with correlation (and other issues)
+    + [Exercise](https://github.com/bomeara/phylometh/tree/master/exercises/correlations)
+
 
 * Week 9, Mar 9
     + Topic: Biogeography and optimization (guest week by Katie Massana)
