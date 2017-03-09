@@ -148,6 +148,10 @@ There is an online option, as well. In this second running of the class, I'm not
 
 * Week 9, Mar 9
     + Topic: Biogeography and optimization (guest week by Katie Massana)
+    + Reading
+      + [Ronquist and Sanmartin, 2011](http://www.annualreviews.org/doi/abs/10.1146/annurev-ecolsys-102209-144710)
+      + [Ree and Smith, 2008](https://academic.oup.com/sysbio/article/57/1/4/1703014/Maximum-Likelihood-Inference-of-Geographic-Range)
+      + [Matzke, 2014](http://dx.doi.org/10.1093/sysbio/syu056)
 
 
 * Week 10, Mar 23
