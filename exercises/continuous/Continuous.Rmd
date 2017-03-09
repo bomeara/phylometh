@@ -96,7 +96,7 @@ Now add these labels to your tree.
 
 ```{r, eval=TRUE}
 cleaned.data$phy$node.label <- best.states
-reg <- sample(1:2, nrow(cleaned.data$data), TRUE) #rep(1, nrow(cleaned.data$data))
+reg <- c(1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 1, 1, 0, 1, 0, 0, 1)
 cont.data <- data.frame(species=rownames(cleaned.data$data), Reg=reg, trait=cleaned.data$data[,1])
 nodeBased.OUMV <- OUwie(cleaned.data$phy, cont.data, model="OUMV", simmap.tree=FALSE, diagn=FALSE, root.age = max(phytools::nodeHeights(cleaned.data$phy)))
 print(nodeBased.OUMV)
@@ -142,7 +142,7 @@ First, look at ?OUwie.fixed to see how to calculate likelihood at a single point
 Next, keep all parameters but alpha at their maximum likelihood estimates (better would be to fix just alpha and let the others optimize given this constraint, but this is harder to program for this class). Try a range of alpha values and plot the likelihood against this.
 
 ```{r, eval=TRUE}
-alpha.values<-seq(from= 0.5 , to= 2 , length.out=50)
+alpha.values<-seq(from= 0.01 , to= 1.2 , length.out=50)
 ```
 
 Keep it simple (and slow) and do a for loop:
@@ -150,7 +150,7 @@ Keep it simple (and slow) and do a for loop:
 ```{r, eval=TRUE}
 likelihood.values <- rep(NA, length(alpha.values))
 for (iteration in sequence(length(alpha.values))) {
-	likelihood.values[iteration] <- OUwie.fixed(cleaned.data$phy, cont.data, model="OUMV", alpha=rep(alpha.values[iteration],2), sigma.sq=best$solution[2,], theta=best$theta[,1], root.age = max(phytools::nodeHeights(cleaned.data$phy)))$loglik
+	likelihood.values[iteration] <- OUwie.fixed(cleaned.data$phy, cont.data, model="OUMV", alpha=rep(alpha.values[iteration],2), sigma.sq=results[[4]]$solution[2,], theta=best$theta[,1], root.age = max(phytools::nodeHeights(cleaned.data$phy)))$loglik
 }
 
 plot(x= alpha.values , y= likelihood.values, xlab=expression(alpha), ylab="log(Likelihood)", type="l", bty="n")
@@ -169,15 +169,15 @@ A rule of thumb for confidence for likelihood is all points two log likelihood u
 Now, let's try looking at both theta parameters at once, keeping the other parameters at their MLEs
 
 ```{r, eval=TRUE}
-# five is the OUMV model. my best model was BM1
+# four is the OUMV model. my best model was BM1
 require("akima")
 nreps<-400
-theta1.points<-c(results[[5]]$theta[1,1], rnorm(nreps-1, results[[5]]$theta[1,1], 5*results[[5]]$theta[1,2])) #center on optimal value, have extra variance
-theta2.points<-c(results[[5]]$theta[2,1], rnorm(nreps-1, results[[5]]$theta[2,1], 5*results[[5]]$theta[2,2])) #center on optimal value, have extra variance
+theta1.points<-c(results[[4]]$theta[1,1], rnorm(nreps-1, results[[4]]$theta[1,1], 5*results[[4]]$theta[1,2])) #center on optimal value, have extra variance
+theta2.points<-c(results[[4]]$theta[2,1], rnorm(nreps-1, results[[4]]$theta[2,1], 5*results[[4]]$theta[2,2])) #center on optimal value, have extra variance
 likelihood.values<-rep(NA,nreps)
 
 for (iteration in sequence(nreps)) {
-	likelihood.values[iteration] <- OUwie.fixed(cleaned.data$phy, cont.data, model="OUMV", alpha=results[[5]]$solution[1,], sigma.sq=results[[5]]$solution[2,], theta=c(theta1.points[iteration], theta2.points[iteration]), root.age = max(phytools::nodeHeights(cleaned.data$phy)))$loglik
+	likelihood.values[iteration] <- OUwie.fixed(cleaned.data$phy, cont.data, model="OUMV", alpha=results[[4]]$solution[1,], sigma.sq=results[[4]]$solution[2,], theta=c(theta1.points[iteration], theta2.points[iteration]), root.age = max(phytools::nodeHeights(cleaned.data$phy)))$loglik
 }
 ```
 
@@ -222,4 +222,6 @@ print(best)
 
 How does this compare to our best model from above? Should they be directly comparable?
 
-* both cases seem to favor favor BM1
+* The best model (BM1) does perform better if the models can be compared. I am not sure about that as i do not fully understand what the tree mapping does. AIC values are only comparable if the same data is used. There is no data added, as far as I can tell.
+
+
