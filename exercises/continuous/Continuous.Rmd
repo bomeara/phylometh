@@ -66,6 +66,8 @@ VisualizeData <- function(phy, data) {
   plot(phy,show.tip.label = FALSE)
   return(c("The minimum latitude is", min(data), "and the maximum latitude is", max(data)))
 }
+
+VisualizeData(cleaned.ant.tree,cleaned.continuous[,2])
 ```
 
 **First, start basic. What is the rate of evolution of your trait on the tree? **
@@ -85,10 +87,11 @@ par(mfcol=(c(1,2)))
 plot(cleaned.ant.tree, show.tip.label=FALSE)
 ou.tree <- rescale(cleaned.ant.tree, model="OU", OU1$opt$alpha)
 plot(ou.tree, show.tip.label=FALSE)
+par(mfcol=(c(1,1)))
 ```
 
 *How are the trees different?*
-The branch lengths of the scaled tree using the OU model are much longer leading to the tips of the trees
+The branch lengths of the scaled tree using the OU model are much longer leading to the tips of the trees.
 
 *Compare trees*
 
@@ -101,6 +104,8 @@ delta.AIC.BM1 <- AIC.BM1 - best.model.AIC
 delta.AIC.OU1 <- AIC.OU1 - best.model.AIC
 ```
 
+Model comparison idicates that the OU model tree better fits the data. 
+
 ##OUwie runs##
 
 This takes longer than you may be used to. 
@@ -109,27 +114,40 @@ We're a bit obsessive about doing multiple starts and in general performing a th
 
 First, we need to assign regimes. The way we do this is with ancestral state estimation of a discrete trait. We can do this using ace() in ape, or similar functions in corHMM or diversitree. Use only one discrete char.
 
-```{r, eval=FALSE}
-one.discrete.char <- _____________
-reconstruction.info <- ace(one.discrete.char, tree, type="discrete", method="ML", CI=TRUE)
+```{r, eval=TRUE}
+discrete.data <- NA
+for (i in 1:length(cleaned.continuous$latitude)){
+  if (abs(cleaned.continuous$latitude[i]) <= 25){
+    discrete.data[i] <- 0
+  }
+  else {discrete.data[i] <- 1}}
+
+one.discrete.char <- cbind.data.frame(rownames(cleaned.continuous),discrete.data)
+rownames(one.discrete.char) <- one.discrete.char[,1]
+
+reconstruction.info <- ace(as.integer(one.discrete.char$discrete.data), cleaned.ant.tree, type="discrete", model="ARD", method="ML", CI=TRUE)
 best.states <- colnames(reconstruction.info$lik.anc)[apply(reconstruction.info$lik.anc, 1, which.max)]
 ```
 
 Now add these labels to your tree.
 
-```{r, eval=FALSE}
-labeled.tree <- ________________
-nodeBased.OUMV <- OUwie(tree, cleaned.continuous,model="OUMV", simmap.tree=FALSE, diagn=FALSE)
+```{r, eval=TRUE}
+OUwie.data <- cbind.data.frame(rownames(cleaned.continuous), discrete.data, cleaned.continuous$latitude)
+
+labeled.tree <- cleaned.ant.tree
+labeled.tree$node.label <- best.states
+nodeBased.OUMV <- OUwie(labeled.tree, OUwie.data ,model="OUMV", simmap.tree=FALSE, diagn=FALSE)
 print(nodeBased.OUMV)
 ```
 
-What do the numbers mean?
+*What do the numbers mean?*
+The Fit output gives us AIC scores for the model "OUMV." AIC scores can be used to compare models, with the lowest AIC score indicating the best model. The rate output give us estimates of the rate of evolution. Specifically, the sigma squared value tells us the rate of stochastic evolution (described by Brownian motion) away from optimum value of the tree (theda). Alpha is a scaling factor that describes the degree of "pull" away from the optimum. The optima output is an estimate of theda, whichthe parameter describing the fitness optima from which species are pulled or to which species evolve. 
 
-Now run all OUwie models:
+*Now run all OUwie models:*
 
-```{r, eval=FALSE}
+```{r, eval=TRUE}
 models <- c("BM1","BMS","OU1","OUM","OUMV","OUMA","OUMVA")
-results <- lapply(models, RunSingleOUwieModel, phy=tree, data=trait)
+results <- lapply(models, OUwie, phy=labeled.tree, data=OUwie.data, simmap.tre=FALSE,diagn=FALSE)
 
 AICc.values<-sapply(results, "[[", "AICc")
 names(AICc.values)<-models
@@ -142,29 +160,30 @@ best<-results[[which.min(AICc.values)]] #store for later
 
 print(best) #prints info on best model
 ```
+The best model is the OUMA model. 
 
 We get SE for the optima (see nodeBased.OUMV$theta) but not for the other parameters. Let's see how hard they are to estimate. 
 First, look at ?OUwie.fixed to see how to calculate likelihood at a single point.
 
-```{r, eval=FALSE}
+```{r, eval=TRUE}
 ?OUwie.fixed
 ```
 
 Next, keep all parameters but alpha at their maximum likelihood estimates (better would be to fix just alpha and let the others optimize given this constraint, but this is harder to program for this class). Try a range of alpha values and plot the likelihood against this.
 
-```{r, eval=FALSE}
-alpha.values<-seq(from= _______________ , to= _______________ , length.out=50)
+```{r, eval=TRUE
+alpha.values<-seq(from=0.001, to=0.99999 , length.out=50)
 ```
 
 Keep it simple (and slow) and do a for loop:
 
 ```{r, eval=FALSE}
-likelihood.values <- rep(NA, length(alpha.values))
+likelihood.values <- NA
 for (iteration in sequence(length(alpha.values))) {
-	likelihood.values[iteration] <- OUwie.fixed(tree, trait, model="OUMV", alpha=rep(alpha.values[iteration],2), sigma.sq=best$solution[2,], theta=best$theta[,1])$loglik
+	likelihood.values[iteration] <- OUwie.fixed(labeled.tree, OUwie.data, model="OUMV", alpha=rep(alpha.values[iteration],2), sigma.sq=best$solution[2,], theta=best$theta[,1])$loglik
 }
 
-plot(x= _______________ , y= _______________, xlab="_______________", ylab="_______________", type="l", bty="n")
+plot(x= alpha.values , y= likelihood.values, xlab="Alpha value", ylab="Likelihood Value", type="l", bty="n")
 points(x=best$solution[1,1], y=best$loglik, pch=16, col="red")
 text(x=best$solution[1,1], y=best$loglik, "unconstrained best", pos=4, col="red")
 ```
