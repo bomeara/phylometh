@@ -34,38 +34,48 @@ ContCleanData <- treedata(tree, continuous.data)
 A function to plot data. Look at `phytools::contMap()`. This is all part of checking: do your data all seem sensible? **LOOK AT IT**.
 
 ```{r, eval=FALSE}
-ContVisualizeData <- function(phy, data) {
+ContCleanData$data[,1] <- as.numeric(ContCleanData$data[,1] )
+ContCleanDataVector <- ContCleanData$data[,1]
+names(ContCleanDataVector) <- rownames(ContCleanData$data)
+ContVisualizeData <- phytools::contMap(ContCleanData$phy, ContCleanDataVector)
+ContVisualizeData
+#ContVisualizeData <- function(tree, ContCleanData$data) {
+  
 	#Important here is to LOOK at your data before running it. Any weird values? Does it all make sense? What about your tree? Polytomies?
 }
 ```
 
 First, start basic. What is the rate of evolution of your trait on the tree? 
 
-```{r, eval=FALSE}
-BM1 <- geiger::fitContinuous(tree, cleaned.continuous, model="BM")
-print(paste("The rate of evolution is", _____, "in units of", _______))
+```{r, eval=TRUE}
+BM1 <- geiger::fitContinuous(ContCleanData$phy, ContCleanDataVector, model="BM")
+print(paste("The rate of evolution is", 477832985871.261353, "in units of", sigma squared))
 ```
 
 Important: What are the rates of evolution? In what units?
+477832985871.261353 sigma squared
 
 
-```{r, eval=FALSE}
-OU1 <- fitContinuous(tree, cleaned.continuous, model="OU")
-par(mfcol(c(1,2)))
-plot(tree, show.tip.label=FALSE)
-ou.tree <- rescale(tree, model="OU", ___alpha____)
-plot(ou.tree)
+```{r, eval=TRUE}
+OU1 <- fitContinuous(ContCleanData$phy, ContCleanDataVector, model="OU")
+par(mfcol=c(1,2))
+plot(ContCleanData$phy, show.tip.label=FALSE)
+ou.tree <- rescale(ContCleanData$phy, model="OU", 2.718282)
+plot(ou.tree, show.tip.label = FALSE)
+sum(ou.tree$edge.length)
+sum(ContCleanData$phy$edge.length)
 ```
 
 How are the trees different?
+branch lengths are shorter throughout the tree on ou.tree
 
 Compare trees
 
-```{r, eval=FALSE}
-AIC.BM1 <- ________FIGURE_OUT_HOW_TO_DO_THIS_____
-AIC.OU1 <- ________FIGURE_OUT_HOW_TO_DO_THIS_____
-delta.AIC.BM1 <- ________FIGURE_OUT_HOW_TO_DO_THIS_____
-delta.AIC.OU1 <- ________FIGURE_OUT_HOW_TO_DO_THIS_____
+```{r, eval=TRUE}
+AIC.BM1 <- BM1$opt$aic
+AIC.OU1 <- OU1$opt$aic
+delta.AIC.BM1 <- AIC.BM1-min(AIC.BM1)
+delta.AIC.OU1 <- AIC.OU1-min(AIC.OU1)
 ```
 
 
@@ -77,27 +87,46 @@ We're a bit obsessive about doing multiple starts and in general performing a th
 
 First, we need to assign regimes. The way we do this is with ancestral state estimation of a discrete trait. We can do this using ace() in ape, or similar functions in corHMM or diversitree. Use only one discrete char.
 
-```{r, eval=FALSE}
-one.discrete.char <- _____________
-reconstruction.info <- ace(one.discrete.char, tree, type="discrete", method="ML", CI=FALSE)
-best.states <- colnames(reconstruction.info)[apply(reconstruction.info$lik.anc, 1, which.max)]
+```{r, eval=TRUE}
+one.discrete.char <- read.csv(file="charstates.csv", header=FALSE, stringsAsFactors=FALSE)
+taxa3 <- one.discrete.char[,1]
+one.discrete.char <- one.discrete.char[,-1]
+names(one.discrete.char) <- taxa3
+one.discrete.char <- one.discrete.char[!is.na(one.discrete.char)]
+OUCleanData <- treedata(ContCleanData$phy, one.discrete.char) 
+OUCleanDataVector <- OUCleanData$data[,1]
+names(OUCleanDataVector) <- rownames(OUCleanData$data)
+reconstruction.info <- ace(OUCleanDataVector, OUCleanData$phy, type="discrete", method="ML", CI=TRUE)
+best.states <- colnames(reconstruction.info$lik.anc)[apply(reconstruction.info$lik.anc, 1, which.max)]
 ```
 
 Now add these labels to your tree.
 
-```{r, eval=FALSE}
-labeled.tree <- ________________
-nodeBased.OUMV <- OUwie(tree, cleaned.continuous,model="OUMV", simmap.tree=FALSE, diagn=FALSE)
+```{r, eval=TRUE}
+OUCleanData$phy$node.label <- best.states
+labeled.tree <- OUCleanData
+
+newcont <- treedata(labeled.tree$phy, ContCleanDataVector)$data
+newdisc <- treedata(ContCleanData$phy, one.discrete.char)$data
+
+cont.clean.data2 <- cbind.data.frame(rownames(newcont), newdisc, newcont)
+
+#nodeBased.OUMV <- OUwie(di2multi(OUCleanData$phy, 1e-5), cont.clean.data2, model="BM1", simmap.tree=FALSE, diagn=FALSE, root.age=0.3921546)
+tree2 <-OUCleanData$phy
+tree2$edge.length <- tree2$edge.length + 0.000001
+nodeBased.OUMV <- OUwie(tree2, cont.clean.data2, model="OUM", simmap.tree=FALSE, diagn=FALSE, starting.vals = c(0.1, 3), root.age=max(nodeHeights(tree2)))
 print(nodeBased.OUMV)
 ```
 
 What do the numbers mean?
+alpha- rate of pull towards central optima
+sigma sq- rate of evolution
 
 Now run all OUwie models:
 
-```{r, eval=FALSE}
+```{r, eval=TRUE}
 models <- c("BM1","BMS","OU1","OUM","OUMV","OUMA","OUMVA")
-results <- lapply(models, RunSingleOUwieModel, phy=tree, data=trait)
+results <- lapply(models, OUwie(phy=tree2, data=cont.clean.data2)
 
 AICc.values<-sapply(results, "[[", "AICc")
 names(AICc.values)<-models
@@ -120,16 +149,16 @@ First, look at ?OUwie.fixed to see how to calculate likelihood at a single point
 
 Next, keep all parameters but alpha at their maximum likelihood estimates (better would be to fix just alpha and let the others optimize given this constraint, but this is harder to program for this class). Try a range of alpha values and plot the likelihood against this.
 
-```{r, eval=FALSE}
-alpha.values<-seq(from= _______________ , to= _______________ , length.out=50)
+```{r, eval=TRUE}
+alpha.values<-seq(from= 0.001 , to= 10 , length.out=50)
 ```
 
 Keep it simple (and slow) and do a for loop:
 
-```{r, eval=FALSE}
+```{r, eval=TRUE}
 likelihood.values <- rep(NA, length(alpha.values))
 for (iteration in sequence(length(alpha.values))) {
-	likelihood.values[iteration] <- OUwie.fixed(tree, trait, model="OUMV", alpha=rep(alpha.values[iteration],2), sigma.sq=best$solution[2,], theta=best$theta[,1])$loglik
+	likelihood.values[iteration] <- OUwie.fixed(tree2, cont.clean.data2, model="OUMV", alpha=rep(alpha.values[iteration],2), sigma.sq=best$solution[2,], theta=best$theta[,1])$loglik
 }
 
 plot(x= _______________ , y= _______________, xlab="_______________", ylab="_______________", type="l", bty="n")
@@ -153,7 +182,7 @@ theta2.points<-c(best$theta[2,1], rnorm(nreps-1, best$theta[2,1], 5*best$theta[2
 likelihood.values<-rep(NA,nreps)
 
 for (iteration in sequence(nreps)) {
-	likelihood.values[iteration] <- OUwie.fixed(tree, trait, model="OUMV", alpha=best$solution[1,], sigma.sq=best$solution[2,], theta=c(theta1.points[iteration], theta2.points[iteration]))$loglik
+	likelihood.values[iteration] <- OUwie.fixed(tree2, cont.clean.data2, model="OUMV", alpha=best$solution[1,], sigma.sq=best$solution[2,], theta=c(theta1.points[iteration], theta2.points[iteration]))$loglik
 }
 ```
 
