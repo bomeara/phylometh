@@ -1,0 +1,115 @@
+---
+title: "Diversification"
+author: "Brian O'Meara"
+date: "3/21/2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, cache=TRUE)
+set.seed(1859)
+```
+
+## Tree only models
+
+First, install and load ape ([Paradis et al., 2004](https://doi.org/10.1093/bioinformatics/btg412)), TreeSim ([Stadler, 2011](http://dx.doi.org/10.1093/sysbio/syr029)), geiger ([Harmon et al., 2008](https://doi.org/10.1093/bioinformatics/btm538)), diversitree ([FitzJohn 2012](http://onlinelibrary.wiley.com/doi/10.1111/j.2041-210X.2012.00234.x/abstract)) and hisse ([Beaulieu & O'Meara, 2016](https://doi.org/10.1093/sysbio/syw022)). For the latter, it's probably best to load the cutting edge github version.
+
+```{r, include=TRUE, echo=TRUE, message=FALSE, warning=FALSE}
+install.packages(c("ape", "TreeSim", "geiger", "diversitree", "devtools"))
+library(ape)
+library(TreeSim)
+library(geiger)
+library(diversitree)
+devtools::install_github("thej022214/hisse")
+library(hisse)
+```
+
+Let's initially look just at diversification alone. Simulate a 30 taxon tree with only speciation, no extinction:
+
+```{r}
+my.tree <- TreeSim::sim.bd.taxa(n=300, numbsim=1, lambda=0.1, mu=0)[[1]]
+```
+
+As always, plot it:
+
+```{r}
+plot(my.tree)
+```
+
+One way to look at trees, and actually what many methods reduce to under the hood, is lineage through time plots. 
+
+```{r}
+ape::ltt.plot(my.tree)
+```
+
+You should see it increasing exponentially. Let's put it on a log scale:
+
+```{r}
+ape::ltt.plot(my.tree, log="y")
+```
+
+We can look at multiple trees:
+
+```{r}
+yule.trees <- TreeSim::sim.bd.taxa(n=300, numbsim=10, lambda=0.1, mu=0, complete=FALSE)
+ape::mltt.plot(yule.trees, log="y", legend=FALSE)
+
+```
+
+We can also look at trees with birth and death.
+
+```{r}
+bd.trees <- TreeSim::sim.bd.taxa(n=300, numbsim=10, lambda=1, mu=.9, complete=FALSE)
+ape::mltt.plot(bd.trees, log="y", legend=FALSE)
+```
+
+And compare them:
+
+```{r}
+depth.range <- range(unlist(lapply(yule.trees,ape::branching.times)), unlist(lapply(bd.trees,ape::branching.times)))
+max.depth <- sum(abs(depth.range)) #ape rescales depths
+plot(x=c(0, -1*max.depth), y=c(1, ape::Ntip(yule.trees[[1]])), log="y", type="n", bty="n", xlab="Time", ylab="N")
+colors=c(rgb(1,0,0,0.5), rgb(0, 0, 0, 0.5))
+list.of.both <- list(bd.trees, yule.trees)
+for (i in sequence(2)) {
+    tree.list <- list.of.both[[i]]
+    for (j in sequence(length(tree.list))) {
+        ape::ltt.lines(tree.list[[j]], col=colors[[i]])   
+    }
+}
+legend("topleft", legend=c("Birth Death", "Yule"), fill=colors)
+```
+
+And zooming in on the final part of the plot:
+
+```{r}
+depth.range <- range(unlist(lapply(yule.trees,ape::branching.times)), unlist(lapply(bd.trees,ape::branching.times)))
+max.depth <- sum(abs(depth.range)) #ape rescales depths
+plot(x=c(0, -5), y=c(200, ape::Ntip(yule.trees[[1]])), log="y", type="n", bty="n", xlab="Time", ylab="N")
+colors=c(rgb(1,0,0,0.5), rgb(0, 0, 0, 0.5))
+list.of.both <- list(bd.trees, yule.trees)
+for (i in sequence(2)) {
+    tree.list <- list.of.both[[i]]
+    for (j in sequence(length(tree.list))) {
+        ape::ltt.lines(tree.list[[j]], col=colors[[i]])   
+    }
+}
+legend("topleft", legend=c("Birth Death", "Yule"), fill=colors)
+```
+
+So even though the the net diversification rate is the same, there are very different patterns: in theory, one can estimate both birth and death rates from these trees. In practice, of course, with rates that change over time due to mass extinctions or trait evolution, missing taxa, etc. it can practically be hard to tell these apart.
+
+**TODO** Try plotting some with other diversification parameters. What happens if speciation rate is much higher than extinction rate? How does the simulation change with different values, but keeping their difference constant? If their sum is constant? [remember to change to `eval=TRUE` to run]
+
+```{r, eval=FALSE}
+my.trees <- TreeSim::sim.bd.taxa(n=300, numbsim=10, lambda=stop("CHOOSE YOUR VALUES"), mu=stop("CHOOSE YOUR VALUES"), complete=FALSE)
+ape::mltt.plot(my.trees, log="y", legend=FALSE)
+```
+
+Once you can see that there is some information in the distribution of branch lengths, you can (and people have) make multiple models and compare them: a model where diversification rate slows or speeds up over time generates different predictions from a model where it's constant, for example. There are a wide bestiary of models to compare: models that imply logistic growth to a maximum number of species ("Let's speciate due to the Rockies!" "Wait, we can't: there are too many species of us in China, we're full!"), species age ("I haven't speciated in a while -- I forget how"), mass extinctions ("Incoming rock!!!"), and more. It's important to remember the idea of [dull hypothesis testing](https://bookdown.org/bomeara/comparative-methods/dull-model-testing.html): if you're comparing a complex model versus a simple model, on a messy, real dataset, you're probably going to reject a simple model, even if the complex model isn't true. It's also worth looking at parameter estimates: if you find your group is undergoing logistic growth, what is the carrying capacity? If it's a group of 26 species, and the carrying capacity is 27, that's very different from finding a carrying capacity of 5000. The effect of missing species can also be significant (simulation to test for this effect can be important). There are also methods, like Medusa ([Alfaro et al., 2009](http://www.pnas.org/content/106/32/13410.abstract)) and BAMM ([Rabosky, 2014[(http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0089543)) that attempt to infer where on a tree diversification rate shifts have happened, though I'd currently (March 2017) caution against their use as the basis for a study (but using them to complement results gotten another way could be informative).
+
+## Tree plus trait models
+
+An important point to remember about trait-based diversification models is that the tree and characters together are a result of the model. Thus, for example, if one wanted to test a null model for a trait having no effect on diversification, simulating trait evolution on an empirical tree is a bad idea: even though the trait data were evolved under a model with no differential diversification, there's no guarantee that the empirical tree was (there are certainly traits that could have affected rates, rates can change through time at mass extinctions, etc.). See more discussion of this in [Beaulieu & O'Meara, (2016)](https://doi.org/10.1093/sysbio/syw022). So to understand diversification, we're going to have to look at the tree and traits jointly.
+
+This exercise is partially based on the [HiSSE vignette](https://cran.r-project.org/web/packages/hisse/vignettes/hisse-vignette.html) by Jeremy Beaulieu.
