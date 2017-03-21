@@ -1,7 +1,7 @@
 ---
 output:
-  html_document: default
   pdf_document: default
+  html_document: default
   word_document: default
 ---
 The syllabus (mostly the schedule) will be updated throughout the semester. You can see it as a [PDF](https://github.com/bomeara/phylometh/raw/master/other/Syllabus.pdf) or [RMarkdown](https://github.com/bomeara/phylometh/blob/master/other/Syllabus.Rmd) file; I have also embedded it below. This site sometimes takes some time to refresh: you can also see the syllabus [here](http://rpubs.com/bomeara/phylomethsyllabus).
@@ -161,6 +161,7 @@ There is an online option, as well. In this second running of the class, I'm not
         + [Maddison, FitzJohn, and Otto, 2007](https://doi.org/10.1080/10635150701607033): The BiSSE paper. Download it as a PDF: the equations do not render in the HTML.
         + [Maddison & FitzJohn, 2015](https://academic.oup.com/sysbio/article-lookup/doi/10.1093/sysbio/syu070): Already read it, but reread for this week.
         + [Beaulieu & O'Meara, 2016](https://doi.org/10.1093/sysbio/syw022): A hidden state version of the BiSSE model.
+    + [Exercise](https://github.com/bomeara/phylometh/tree/master/exercises/diversification/exercises/diversification/diversification_exercise.Rmd)
 
 
 * Week 11, Mar 30
