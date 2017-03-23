@@ -4,26 +4,27 @@ You can do this on your own data, or on included data here.
 
 ##Continuous data
 
-```{r, eval=FALSE}
+```{r, eval=TRUE}
 library(geiger)
-library(pic)
+library(picante)
 tree.primates <- read.tree(text="((((Homo:0.21,Pongo:0.21):0.28,Macaca:0.49):0.13,Ateles:0.62):0.38,Galago:1.00);") #using examples from ape ?pic
 X <- c(4.09434, 3.61092, 2.37024, 2.02815, -1.46968)
 Y <- c(4.74493, 3.33220, 3.36730, 2.89037, 2.30259)
 names(X) <- names(Y) <- c("Homo", "Pongo", "Macaca", "Ateles", "Galago")
 pic.X <- pic(X, tree.primates)
 pic.Y <- pic(Y, tree.primates)
+
+## lm(pic.X ~ pic.Y - 1) # regression through the origin
 ```
 
 Now, positivitize the contrasts and do a regression through the origin.
 
 ##Discrete data
 
-```{r, eval=FALSE}
+```{r, eval=TRUE}
 require("corHMM")
 ?corHMM
 data(primates)
-ls()
 print(primates)
 require(phytools)
 ```
@@ -34,7 +35,7 @@ For actual analyses, of course, DO NOT INVENT YOUR DATA.
 
 First, a review of discrete state models:
 
-```{r, eval=FALSE}
+```{r, eval=TRUE}
 primates$trait[which(grepl("Hylobates",primates$trait[,1])),2]<-1
 
 trait1<-primates$trait[,2]
@@ -45,40 +46,53 @@ print(rate.mat.er)
 ```
 
 What does this matrix mean?
+This matrix is showing the probability of transition from trait 0 to 1 and from 1 to 0. The rates are equal (both 1) because this is an equal rates model. 
 
-```{r, eval=FALSE}
+```{r, eval=TRUE}
 pp.er<-corHMM(primates$tree,primates$trait[,c(1,2)],rate.cat=1,rate.mat=rate.mat.er,node.states="marginal")
 print(pp.er)
 ```
 
 What do these results mean?
+This matrix is giving us the maximum likelihood estimate of rates of evoltuion parameters. The rates of evolution are equal from traits 0 to 1 and from 1 to 0 because we are using an equal rates model. The matrix indicates taht the rate of evolution is 0.0107. 
 
-```{r, eval=FALSE}
+
+```{r, eval=TRUE}
 rate.mat.ard<-rate.mat.maker(rate.cat=1, hrm=FALSE, ntraits=1, nstates=2, model="ARD")
 print(rate.mat.ard)
 ```
 
 And these?
+This matrix now allows for different transition rates between states. The results mean that it is twice as likely to transition from state 0 to 1 than from state 1 to 0. 
 
-```{r, eval=FALSE}
+```{r, eval=TRUE}
 pp.ard<-corHMM(primates$tree,primates$trait[,c(1,2)],rate.cat=1,rate.mat=rate.mat.ard,node.states="marginal")
 print(pp.ard)
 ```
 
 which model is better?
+```{r, eval=TRUE}
+delta.AIC.pp.er <- pp.er$AIC - min(AIC.pp.er,AIC.pp.ard)
+delta.AIC.pp.ard <- pp.ard$AIC - min(AIC.pp.er,AIC.pp.ard)
+if (delta.AIC.pp.er == 0){
+  print("Equal rates model is better")
+} else{(print("All rates differ model is better"))}
+```
+The equal rates model has a lower AIC score. 
+
 
 Now let's look at multiple traits.
 
 This is a matrix with four states
 
-```{r, eval=FALSE}
+```{r, eval=TRUE}
 rate.mat.er.4state<-rate.mat.maker(rate.cat=1, hrm=FALSE, ntraits=1, nstates=4, model="ER")
 print(rate.mat.er.4state)
 ```
 
 Convert the two binary traits into a single four character state
 
-```{r, eval=FALSE}
+```{r, eval=TRUE}
 fourstate.trait<-rep(NA,Ntip(primates$tree))
 for(i in sequence(Ntip(primates$tree))) {
 	if(primates$trait[i,2]==0 && primates$trait[i,3]==0) {
@@ -104,7 +118,7 @@ print(rate.mat.ard.4state)
 
 Now let's make the equivalent of a GTR matrix:
 
-```{r, eval=FALSE}
+```{r, eval=TRUE}
 rate.mat.gtr.4state<-rate.mat.ard.4state
 rate.mat.gtr.4state<-rate.par.eq(rate.mat.gtr.4state, c(1,4))
 rate.mat.gtr.4state<-rate.par.eq(rate.mat.gtr.4state, c(2,6))
@@ -120,7 +134,7 @@ print(rayDISC(primates$tree, fourstate.data, ntraits=1, rate.mat= rate.mat.gtr.4
 
 Now make a model like Pagel 1994
 
-```{r, eval=FALSE}
+```{r, eval=TRUE}
 print(rate.mat.maker(rate.cat=1, hrm=FALSE, ntraits=2, nstates=2, model="ARD"))
 rate.mat.pag94<-rate.par.drop(rate.mat.ard.4state, drop.par=c(3,5,8,10))
 print
@@ -131,6 +145,21 @@ Now that you have some introduction, there are two routes:
 ##Route 1
 
 **Construct a model to test if state 1 can never be lost**
+
+```{r, eval=TRUE}
+keep.1.matrix <- rate.mat.gtr.4state
+keep.1.matrix[1,2:4]<-0
+
+canbelost <- rayDISC(primates$tree, fourstate.data, ntraits=1, rate.mat=rate.mat.gtr.4state, node.states="marginal", model="ARD")
+
+cannotbelost <- rayDISC(primates$tree, fourstate.data, ntraits=1, rate.mat=keep.1.matrix, node.states="marginal", model="ARD")
+
+delta.AIC.canbelost <- canbelost$AIC - min(canbelost$AIC,cannotbelost$AIC)
+delta.AIC.cannotbelost <- cannotbelost$AIC - min(canbelost$AIC,cannotbelost$AIC)
+if (delta.AIC.canbelost == 0){
+  print("Allowing transitions away from state 1 is a better model, indicating that state 1 can be lost")
+} else{(print("Not allowing transitions away from state 1 is a better model, indicating that state 1 can never be lost"))}
+```
 
 **Experiment with the effects of frequencies at the root.**
 
