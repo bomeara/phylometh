@@ -2,15 +2,15 @@
 
 GetHowManyTrees <- function(ntaxa=10) {
 	#ape can compute this for us.
-	result <- ___SOME FUNCTION WITH AN ARGUMENT_____
+    result <- ape::howmanytrees(ntaxa)
 	return(result)
 }
 
 GetAlignment <- function() {
 	#Let's see where mafft is installed
 	library(ape)
-	print(system("which mafft"))
+	print(system("/usr/local/bin/mafft"))
 	data(woodmouse)
-	result <- ips::mafft(____SOME INPUT ARGUMENT____)
+	result <- ips::mafft(woodmouse)
 	return(result)
 }
