@@ -2,7 +2,9 @@
 title: "DiscreteCharacters"
 author: "Brian O'Meara"
 date: "2/16/2017"
-output: html_document
+output:
+  html_document: default
+  pdf_document: default
 ---
 
 For this exercise, explore looking at discrete character models. Note: they are not "discreet" character models -- they're actually pretty noisy.
@@ -29,26 +31,32 @@ library(corHMM)
 
 You'll need to get data into R in some way. 
 
-```{r, eval=FALSE}
-tree <- read.tree("____PATH_TO_TREE_OR_SOME_OTHER_WAY_OF_GETTING_A_TREE____")
-discrete.data <- read.csv(file="____PATH_TO_DATA_OR_SOME_OTHER_WAY_OF_GETTING_TRAITS____", stringsAsFactors=FALSE) #death to factors.
+```{r, eval=TRUE}
+tree <- read.tree("Hydnum_bipartitions_060916.tre")
+discrete.data <- read.csv(file="charstates.csv", header=FALSE, stringsAsFactors=FALSE) #death to factors.
+taxa <- discrete.data[,1]
+discrete.data <- discrete.data[,-1]
+names(discrete.data) <- taxa
+discrete.data <- discrete.data[!is.na(discrete.data)]
 ```
 
 Data are often not right in some way. They might not match the taxa in your tree, there may be missing data, etc. `geiger::treedata` is a great function for getting a tree and data that match, but your data may need other cleaning. Do it as a function so it's repeatable.
 
-```{r, eval=FALSE}
-CleanData <- function(phy, data) {
+```{r, eval=TRUE}
+CleanData <- geiger::treedata(tree, discrete.data) 
+{
 	#treedata() in Geiger is probably my favorite function in R.
 }
-
-# Now write the code to use CleanData() to actually clean your data
 
 ```
 
 It's critically important to LOOK at what you have. Are there weird values? Has the match between taxa and state gone correctly? Do you think you have binary data, but there's actually only state 1? Especially as data sets grow (yay), and are assembled using scripts rather than by error-prone, non-reproducable hands (double yay), scientists are increasingly less likely to deeply look at our data. That's bad -- don't be that person.
 
-```{r, eval=FALSE}
-VisualizeData <- function(phy, data) {
+```{r, eval=TRUE}
+CleanData
+tree2 <- ladderize(tree, right = FALSE)
+VisualizeData <- plotTree(tree2) 
+  {
 	#Important here is to LOOK at your data before running it. Any weird values? Does it all make sense? What about your tree? Polytomies?
     
     # Now write the code to use VisualizeData() to actually look at your data
@@ -58,30 +66,61 @@ VisualizeData <- function(phy, data) {
 
 First, let's use parsimony to look at ancestral states:
 
-```{r, eval=FALSE}
-cleaned.discrete.phyDat <- phangorn::phyDat(cleaned.discrete, type="______________") #phyDat is a data format used by phangorn
-anc.p <- phangorn::ancestral.pars(tree, cleaned.discrete.phyDat)
-plotAnc(tree, anc.p, 1)
+```{r, eval=TRUE}
+cleaned.discrete <- as.matrix(CleanData$data)
+cleaned.discrete.phyDat <- phangorn::phyDat(cleaned.discrete, type="USER", levels=c("0","1","2")) 
+#phyDat is a data format used by phangorn
+anc.p <- phangorn::ancestral.pars(CleanData$phy, cleaned.discrete.phyDat)
+plotAnc(CleanData$phy, anc.p, 1, cex.pie=.5)
 ```
 
 Do you see uncertainty? What does it mean?
+yes, at certain nodes-- either state equally likely due to either state producing an equally parsimonius reconstruction
 
 Now, plot the likelihood estimates. 
 
-```{r, eval=FALSE}
-anc.ml <- ancestral.pml(pml(tree, cleaned.discrete.phyDat), type="ml")
-plotAnc(tree, anc.ml, 1)
+```{r, eval=TRUE}
+anc.ml <- ancestral.pml(pml(CleanData$phy, cleaned.discrete.phyDat), type="ml")
+plotAnc(CleanData$phy, anc.ml, 1, cex.pie=.5)
 ```
 
 How does this differ from parsimony? 
+less uncertainty at ancestral nodes
 
 Why does it differ from parsimony?
+ancestral nodes in ML tree show probability of each state at ancestral node
 
 What does uncertainty mean?
+there is a possibility that the ancestral node was a different state
 
 Now, to the biological questions. For many of these, `corHMM` will be a useful package.
 
 1. How can you estimate transition rates between states? Do it.
+```{r, eval=TRUE}
+cor.data <- cbind(row.names(CleanData$data),CleanData$data[,1])
+cor.data.fake <- cor.data[,1:2]
+
+for (i in 1:length(cor.data[,2])) {
+  if (cor.data[i,2] == "2") {
+    cor.data.fake[i,2] <- 1
+  }
+}
+
+#cor.result <- corHMM(CleanData$phy, cor.data, rate.cat=1, node.states=c("joint"))
+#only works for 2 char. states instead of original 3
+cor.result1 <- corHMM(CleanData$phy, cor.data.fake, rate.cat=1, node.states=c("joint"))
+cor.result1
+```
+
 2. How could you examine if transition rates are equal?
+use p in corHMM to contrain the parameter for each transition rate between characters to be equal and compare AIC score to cor.result1 above
+
 3. Think about the Lewis (2001) MKV model. Are your traits all variable? Will using this make sense for your data? Try using it. Do results change?
+yes, the traits are variable so lewisMKV would be appropriate, but gives high AIC score. 
+```{r, eval=TRUE}
+lewis.result <- lewisMkv(CleanData$phy, cor.data)
+lewis.result
+```
+
 4. How could you test order of state evolution?
+use root.p to fix the root node to be each of the character states and compare all models

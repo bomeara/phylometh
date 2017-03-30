@@ -127,7 +127,10 @@ There is an online option, as well. In this second running of the class, I'm not
 * Week 7, Feb 23
     + Topic: Continuous character models
     + Items: Surface, OUwie, geiger
+<<<<<<< HEAD
+=======
     + Videos: [OU, BM, etc](https://youtu.be/awN_VBv8reU?list=PLRyq_4VPZ9g9-pxqGRLJjE1FcqNvnC-gg)
+>>>>>>> febd55047a656488677ae8722c7252316c3339c3
     + Reading:
         + [Hansen and Martins, 2006](http://www.jstor.org/stable/2410878): Linking micro and macroevolutionary models. TL;DR: Table 1 shows that many microevolutionary models reduce to Brownian motion.
         + [Felsenstein 1988](http://www.annualreviews.org/doi/abs/10.1146/annurev.es.19.110188.002305?journalCode=ecolsys.1): Biology behind the model.
@@ -142,9 +145,12 @@ There is an online option, as well. In this second running of the class, I'm not
     + Reading
         + [Felsenstein, 1985](http://dx.doi.org/10.1086/284325): Independent contrasts
         + [Pagel, 1994](http://dx.doi.org/10.1098/rspb.1994.0006): Pagel 94 correlation
+<<<<<<< HEAD
+=======
         + [Maddison & FitzJohn, 2015](https://academic.oup.com/sysbio/article-lookup/doi/10.1093/sysbio/syu070): A big problem with correlation (and other issues)
     + [Exercise](https://github.com/bomeara/phylometh/tree/master/exercises/correlations)
 
+>>>>>>> febd55047a656488677ae8722c7252316c3339c3
 
 * Week 9, Mar 9
     + Topic: Biogeography and optimization (guest week by Katie Massana)
