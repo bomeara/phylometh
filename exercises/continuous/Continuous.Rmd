@@ -15,30 +15,41 @@ library(OUwie)
 
 Now get the tree and data. For these exercises, knowing uncertainty in your measurements can also be important. (remember for homework to change `eval=FALSE` to `eval=TRUE`).
 
-```{r, eval=FALSE}
-tree <- read.tree("____PATH_TO_TREE_OR_SOME_OTHER_WAY_OF_GETTING_A_TREE____")
-continuous.data <- read.csv(file="____PATH_TO_DATA_OR_SOME_OTHER_WAY_OF_GETTING_TRAITS____", stringsAsFactors=FALSE) #death to factors.
+```{r, eval=TRUE}
+SumFam<-read.delim(file="SumFam2.txt", header=FALSE, stringsAsFactors = FALSE)
+SumFamData <- read.delim(file="SumFam2.txt",stringsAsFactors=FALSE)
+tree<-read.delim("SumFam2.txt")
+phylo <- ape::rcoal(n=nrow(SumFam), tip.label = SumFam[,1])
+plot(phylo)
+
 ```
 
 A function to clean data, make sure taxon names match between tree and data, etc. 
 
-```{r, eval=FALSE}
-CleanData <- function(phy, data) {
-	#treedata() in Geiger is probably my favorite function in R.
+```{r, eval=TRUE}
+CleanData <- treedata(phylo, SumFamData) {
+  result <- treedata(phylo,SumFamData)
+  
 }
 ```
 
 A function to plot data. Look at `phytools::contMap()`. This is all part of checking: do your data all seem sensible? **LOOK AT IT**.
 
-```{r, eval=FALSE}
-VisualizeData <- function(phy, data) {
-	#Important here is to LOOK at your data before running it. Any weird values? Does it all make sense? What about your tree? Polytomies?
+```{r, eval=TRUE}
+rownames(SumFam) <- SumFam[,1]
+SumFam <- SumFam[,-1]
+for (i in sequence(ncol(SumFam))) {
+  data <- SumFam[,i]
+  names(data) <- rownames(SumFam)
+  phytools::contMap(phylo,data, plot=TRUE)
 }
+
 ```
 
 First, start basic. What is the rate of evolution of your trait on the tree? 
 
 ```{r, eval=FALSE}
+cleaned.continuous <- CleanData(phylo, SumData)
 BM1 <- geiger::fitContinuous(tree, cleaned.continuous, model="BM")
 print(paste("The rate of evolution is", _____, "in units of", _______))
 ```
@@ -76,8 +87,8 @@ First, we need to assign regimes. The way we do this is with ancestral state est
 
 ```{r, eval=FALSE}
 one.discrete.char <- _____________
-reconstruction.info <- ace(one.discrete.char, tree, type="discrete", method="ML", CI=TRUE)
-best.states <- colnames(reconstruction.info$lik.anc)[apply(reconstruction.info$lik.anc, 1, which.max)]
+reconstruction.info <- ace(one.discrete.char, tree, type="discrete", method="ML", CI=FALSE)
+best.states <- colnames(reconstruction.info)[apply(reconstruction.info$lik.anc, 1, which.max)]
 ```
 
 Now add these labels to your tree.
