@@ -10,12 +10,11 @@ By the end of this week, you will have:
 * All required tools installed
 * Rudimentary understanding of
     + git
-    + unit testing
     + command line
 * Ability to do the first assignment
 * Ability to talk to classmates
-    
-Things I want you do are **in bold**.     
+
+Things I want you do are **in bold**.
 
 In this class we'll be using a variety of programs and technologies. Most are open source: "software that can be freely used, changed, and shared (in modified or unmodified form) by anyone" https://opensource.org. For science, open source software is important: we build on the work of others in making discoveries, and open software allows others to build on it in the same way. It also aids transparency and reproducibility: you can go deep into code to see what is being done, and even if a developer stops supporting software, someone else can take it over and maintain it.
 
@@ -25,7 +24,7 @@ Every student needs a [GitHub](http://github.com) account so we can all use git 
 
 Once you have an account, **go to https://gitter.im/bomeara/phylometh**. Gitter is a free service that allows for group chats (think of something like Skype chatting). I have made a public group for the course: anyone can join or read the texts. You can download various apps for Gitter for your laptop or phone: https://gitter.im/apps.
 
-You will need a variety of software: **right now, R and git**; eventually, things like RevBayes, BEAST, and more. 
+You will need a variety of software: **right now, R and git**; eventually, things like RevBayes, BEAST, and more.
 
 On a Mac, it is easiest to first install homebrew (will help a lot with later steps): see [here](http://brew.sh) for how to do that. Then install git. For Linux, you probably already know how to use a package manager. For Windows, there is a git installer, but you might consider something like cygwin as well.
 
@@ -62,15 +61,15 @@ biocLite("Biostrings")
 
 I would suggest using RStudio for writing R and handling markdown (see below). It is free and open source; you can install it from [here](https://www.rstudio.com/products/RStudio/).
 
-Once you have all this done, it is time to start the exercise. 
+Once you have all this done, it is time to start the exercise.
 
 ## Exercise
 
-We are going to adopt a programming approach that has you write functions in one file, then run analyses in an R markdown document. This very document is an R markdown doc, actually. Markdown is like a very lightweight alternative to html that is far more readable. Rather than writing `<b>this</b>` to make **bold** text, you can instead write `**this**`. "So what?" was my first thought, but it turns out it does make a lot of things easier. R markdown lets you embed R calls within a document and so intersperse text and code very naturally. It can embed figures, too. In fact, the book for the course is written in R markdown. 
+We are going to adopt a programming approach that has you write functions in one file, then run analyses in an R markdown document. This very document is an R markdown doc, actually. Markdown is like a very lightweight alternative to html that is far more readable. Rather than writing `<b>this</b>` to make **bold** text, you can instead write `**this**`. "So what?" was my first thought, but it turns out it does make a lot of things easier. R markdown lets you embed R calls within a document and so intersperse text and code very naturally. It can embed figures, too. In fact, the book for the course is written in R markdown.
 
 Your assignment has three parts:
 
-1. Using github, clone https://github.com/bomeara/phylometh. Your clone is how you will do homework: you will change things, commit them, and then try doing a pull request. I will review your pull requests to give you feedback on the homework.
+1. Using github, **fork**  https://github.com/bomeara/phylometh. Then **clone** it. Your clone is how you will do homework: you will change things, commit them, and then try doing a pull request. I will review your pull requests to give you feedback on the homework.
 2. Figure out how to write R markdown by modifying this file as indicated below.
 3. Fix the functions in `gettingstarted_exercise.R`
 
@@ -84,7 +83,7 @@ library(ape)
 plot(rcoal(5))
 ```
 
-Look at the Markdown Cheatsheet [PDF](https://www.rstudio.com/wp-content/uploads/2015/02/rmarkdown-cheatsheet.pdf) for more info. 
+Look at the Markdown Cheatsheet [PDF](https://www.rstudio.com/wp-content/uploads/2015/02/rmarkdown-cheatsheet.pdf) for more info.
 
 *To do*
 
@@ -110,4 +109,3 @@ source("gettingstarted_exercise.R")
 print(paste("For 15 taxa there are", GetHowManyTrees(15), "trees"))
 print(GetAlignment())
 ```
-
