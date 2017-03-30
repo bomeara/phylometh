@@ -18,11 +18,17 @@ library(phytools)
 library(phangorn)
 library(corHMM)
 ```
+library(ape)
+setwd("~/Desktop")
+MyData<-do.call(rbind, read.nexus.data("Maggie_nexus"))
+phyDatdata <- phyDat(MyData, type="USER", levels=c("0", "1", "2"))
+MyData.DNA <- MyData
+
 
 You'll need to get data into R in some way. 
 
 ```{r, eval=FALSE}
-tree <- read.tree("____PATH_TO_TREE_OR_SOME_OTHER_WAY_OF_GETTING_A_TREE____")
+MyTree<-read.nexus.data("Maggie_nexus")
 discrete.data <- read.csv(file="____PATH_TO_DATA_OR_SOME_OTHER_WAY_OF_GETTING_TRAITS____", stringsAsFactors=FALSE) #death to factors.
 ```
 
