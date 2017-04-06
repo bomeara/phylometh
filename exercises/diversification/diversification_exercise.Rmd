@@ -5,9 +5,10 @@ date: "3/21/2017"
 output: html_document
 ---
 
-```{r setup, include=FALSE}
+```{r setup, include=TRUE}
 knitr::opts_chunk$set(echo = TRUE, cache=TRUE)
 set.seed(1859)
+options(repos = "http://cran.us.r-project.org")
 ```
 
 ## Tree only models
@@ -20,7 +21,8 @@ library(ape)
 library(TreeSim)
 library(geiger)
 library(diversitree)
-devtools::install_github("thej022214/hisse")
+#devtools::install_github("thej022214/hisse")
+
 library(hisse)
 ```
 
@@ -32,8 +34,8 @@ my.tree <- TreeSim::sim.bd.taxa(n=300, numbsim=1, lambda=0.1, mu=0)[[1]]
 
 As always, plot it:
 
-```{r}
-stop("How to plot a tree")
+```{r, eval=TRUE}
+plot(my.tree, show.tip.label=FALSE)
 ```
 
 One way to look at trees, and actually what many methods reduce to under the hood, is lineage through time plots. 
@@ -52,7 +54,7 @@ We can look at multiple trees:
 
 ```{r}
 yule.trees <- TreeSim::sim.bd.taxa(n=300, numbsim=10, lambda=0.1, mu=0, complete=FALSE)
-stop("How to do a multiple ltt plot?")
+mltt.plot(yule.trees)
 
 ```
 
@@ -99,11 +101,67 @@ legend("topleft", legend=c("Birth Death", "Yule"), fill=colors)
 
 So even though the the net diversification rate is the same, there are very different patterns: in theory, one can estimate both birth and death rates from these trees. In practice, of course, with rates that change over time due to mass extinctions or trait evolution, missing taxa, etc. it can practically be hard to tell these apart.
 
-**TODO** Try plotting some with other diversification parameters. What happens if speciation rate is much higher than extinction rate? How does the simulation change with different values, but keeping their difference constant? If their sum is constant? [remember to change to `eval=TRUE` to run]
+**TODO** Try plotting some with other diversification parameters. What happens if speciation rate is much higher than extinction rate? 
 
-```{r, eval=FALSE}
-my.trees <- TreeSim::sim.bd.taxa(n=300, numbsim=10, lambda=stop("CHOOSE YOUR VALUES"), mu=stop("CHOOSE YOUR VALUES"), complete=FALSE)
-ape::mltt.plot(my.trees, log="y", legend=FALSE)
+```{r, eval=TRUE}
+high.trees <- TreeSim::sim.bd.taxa(n=300, numbsim=10, lambda=1, mu=0.1, complete=FALSE)
+low.trees <- TreeSim::sim.bd.taxa(n=300, numbsim=10, lambda=1, mu=0.95, complete=FALSE)
+
+depth.range <- range(unlist(lapply(high.trees,ape::branching.times)), unlist(lapply(low.trees,ape::branching.times)))
+max.depth <- sum(abs(depth.range)) #ape rescales depths
+plot(x=c(0, -1*max.depth), y=c(1, ape::Ntip(high.trees[[1]])), log="y", type="n", bty="n", xlab="Time", ylab="N")
+colors=c(rgb(1,0,0,0.5), rgb(0, 0, 0, 0.5))
+list.of.both <- list(high.trees, low.trees)
+for (i in sequence(2)) {
+    tree.list <- list.of.both[[i]]
+    for (j in sequence(length(tree.list))) {
+        ape::ltt.lines(tree.list[[j]], col=colors[[i]])   
+    }
+}
+legend("topleft", legend=c("b=1,d=0.95", "b=1,d=0.1"), fill=colors)
+```
+
+How does the simulation change with different values, but keeping their difference constant?  
+
+```{r, eval=TRUE}
+my.trees1 <- TreeSim::sim.bd.taxa(n=300, numbsim=10, lambda=0.8, mu=0.7, complete=FALSE)
+my.trees2 <- TreeSim::sim.bd.taxa(n=300, numbsim=10, lambda=0.2, mu=0.1, complete=FALSE)
+ape::mltt.plot(my.trees1, log="y", legend=FALSE)
+ape::mltt.plot(my.trees2, log="y", legend=FALSE)
+
+depth.range <- range(unlist(lapply(my.trees1,ape::branching.times)), unlist(lapply(my.trees2,ape::branching.times)))
+max.depth <- sum(abs(depth.range)) #ape rescales depths
+plot(x=c(0, -1*max.depth), y=c(1, ape::Ntip(my.trees1[[1]])), log="y", type="n", bty="n", xlab="Time", ylab="N")
+colors=c(rgb(1,0,0,0.5), rgb(0, 0, 0, 0.5))
+list.of.both <- list(my.trees1, my.trees2)
+for (i in sequence(2)) {
+    tree.list <- list.of.both[[i]]
+    for (j in sequence(length(tree.list))) {
+        ape::ltt.lines(tree.list[[j]], col=colors[[i]])   
+    }
+}
+legend("topleft", legend=c("b=0.3,d=0.2", "b=0.8,d=0.7"), fill=colors)
+```
+
+If their sum is constant?
+
+```{r, eval=TRUE}
+my.trees3 <- TreeSim::sim.bd.taxa(n=300, numbsim=10, lambda=.5, mu=0.4, complete=FALSE)
+my.trees4 <- TreeSim::sim.bd.taxa(n=300, numbsim=10, lambda=.6, mu=0.3, complete=FALSE)
+
+depth.range <- range(unlist(lapply(my.trees3,ape::branching.times)), unlist(lapply(my.trees4,ape::branching.times)))
+max.depth <- sum(abs(depth.range)) #ape rescales depths
+plot(x=c(0, -1*max.depth), y=c(1, ape::Ntip(my.trees3[[1]])), log="y", type="n", bty="n", xlab="Time", ylab="N")
+colors=c(rgb(1,0,0,0.5), rgb(0, 0, 0, 0.5))
+list.of.both <- list(my.trees3, my.trees4)
+for (i in sequence(2)) {
+    tree.list <- list.of.both[[i]]
+    for (j in sequence(length(tree.list))) {
+        ape::ltt.lines(tree.list[[j]], col=colors[[i]])   
+    }
+}
+legend("topleft", legend=c("b=0.3,d=0.6", "b=0.5,d=0.4"), fill=colors)
+
 ```
 
 Once you can see that there is some information in the distribution of branch lengths, you can (and people have) make multiple models and compare them: a model where diversification rate slows or speeds up over time generates different predictions from a model where it's constant, for example. There are a wide bestiary of models to compare: models that imply logistic growth to a maximum number of species ("Let's speciate due to the Rockies!" "Wait, we can't: there are too many species of us in China, we're full!"), species age ("I haven't speciated in a while -- I forget how"), mass extinctions ("Incoming rock!!!"), and more. It's important to remember the idea of [dull hypothesis testing](https://bookdown.org/bomeara/comparative-methods/dull-model-testing.html): if you're comparing a complex model versus a simple model, on a messy, real dataset, you're probably going to reject a simple model, even if the complex model isn't true. It's also worth looking at parameter estimates: if you find your group is undergoing logistic growth, what is the carrying capacity? If it's a group of 26 species, and the carrying capacity is 27, that's very different from finding a carrying capacity of 5000. The effect of missing species can also be significant (simulation to test for this effect can be important). There are also methods, like Medusa ([Alfaro et al., 2009](http://www.pnas.org/content/106/32/13410.abstract)) and BAMM ([Rabosky, 2014[(http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0089543)) that attempt to infer where on a tree diversification rate shifts have happened, though I'd currently (March 2017) caution against their use as the basis for a study (but using them to complement results gotten another way could be informative).
@@ -198,7 +256,7 @@ trans.rates.bisse
 ```
 Whatever transition matrix is designed, it is supplied to the `trans.rate=` argument in the `hisse()` call:
 ```{r, eval=FALSE}
-pp = hisse(phy, sim.dat, f=c(1,1), hidden.states=TRUE, turnover.anc=turnover.anc, 
+pp <- hisse(phy, sim.dat, f=c(1,1), hidden.states=TRUE, turnover.anc=turnover.anc, 
            eps.anc=eps.anc, trans.rate=trans.rates.nodual.allequal)
 ```
 
