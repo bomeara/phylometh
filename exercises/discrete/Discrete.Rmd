@@ -5,7 +5,11 @@ date: "2/16/2017"
 output: html_document
 ---
 
+<<<<<<< HEAD
+**For this exercise, explore looking at discrete character models.**
+=======
 For this exercise, explore looking at discrete character models. Note: they are not "discreet" character models -- they're actually pretty noisy.
+>>>>>>> 6ac3e99c3eb398e2b4dc9b6cb7a2ccafe1eb652e
 
 Remember for homework, 
 
@@ -25,63 +29,167 @@ library(geiger)
 library(phytools)
 library(phangorn)
 library(corHMM)
+library("spocc")
 ```
 
-You'll need to get data into R in some way. 
+**You'll need to get data into R in some way.** 
 
-```{r, eval=FALSE}
-tree <- read.tree("____PATH_TO_TREE_OR_SOME_OTHER_WAY_OF_GETTING_A_TREE____")
-discrete.data <- read.csv(file="____PATH_TO_DATA_OR_SOME_OTHER_WAY_OF_GETTING_TRAITS____", stringsAsFactors=FALSE) #death to factors.
+```{r, eval=TRUE}
+tree.beetles <- ape::read.nexus(file='C:/Users/maggi/Desktop/beetleoutputtree')
+### A 17 species tree of Onthophagus species, European species
+species <- gsub("O._", "Onthophagus ", tree$tip.label)
+### A list of species on tree tips
+
+### Below function searches gbif for distribution data and returns whether the species lives in warm environments (> 35 degrees latitude), cold environments (< 35 degrees latitude), or both. 35 degrees latitude seperates Mediterrean beetles from those living in Northern Europe
+gbifdata <- NA
+for (i in 1:length(species)){
+  speciesdat <- occ2df(occ(query=species[i], from="gbif", has_coords=TRUE, limit=1000))
+  if (dim(speciesdat)[1] > 0){
+  warmish <- length(which(abs(speciesdat[,3]) < 35))
+  coldish <- length(which(abs(speciesdat[,3]) >= 35))
+    if (warmish > 0 & coldish > 0){
+    gbifdata[i] <- "both"
+  }
+  if (warmish > 0 & coldish == 0){
+    gbifdata[i] <- "warm"
+  }
+  if (warmish == 0 & coldish > 0){
+    gbifdata[i] <- "cold"
+  }
+  } else{gbifdata[i] <- NA}
+}
+
+### Fixing up my data based on my prior knowledge of these species destributions
+gbifdata[1] <- "cold"
+gbifdata[3] <- "cold"
+gbifdata[7] <- "both"
+gbifdata[5] <- "both"
+gbifdata[10] <- "cold"
+
+### Have these European species invaded the US?
+invasiveinUS <- c("N", "N", "N", "N", "N", "N", "N", NA, NA, "Y", "N", "N", "N", "N", "N", "Y", "N")
+
+### What color is the elytron? 
+bodycolor <- c("yellow", "black", NA, "yellow", "black", "yellow", "gold", NA, NA, "black", "black", "black", "black", "gold", NA, "brown", "yellow")
+
+discrete.data <- data.matrix(cbind(gbifdata,invasiveinUS,bodycolor))
+rownames(discrete.data) <- gsub("Onthophagus ", "O._",species)
+
 ```
+
 
 Data are often not right in some way. They might not match the taxa in your tree, there may be missing data, etc. `geiger::treedata` is a great function for getting a tree and data that match, but your data may need other cleaning. Do it as a function so it's repeatable.
 
-```{r, eval=FALSE}
+```{r, eval=TRUE}
 CleanData <- function(phy, data) {
+  no.missing <- na.omit(data)
+  cleaned.data <- geiger::treedata(phy,no.missing)$data
 	#treedata() in Geiger is probably my favorite function in R.
 }
 
-# Now write the code to use CleanData() to actually clean your data
+CleanTree <- function(phy, data) {
+  no.missing <- na.omit(data)
+  cleaned.tree <- geiger::treedata(phy,no.missing)$phy
+	#treedata() in Geiger is probably my favorite function in R.
+}
+
+cleaned.discrete <- CleanData(tree,discrete.data)
+cleaned.tree.beetles <- CleanTree(tree.beetles,discrete.data)
 
 ```
 
 It's critically important to LOOK at what you have. Are there weird values? Has the match between taxa and state gone correctly? Do you think you have binary data, but there's actually only state 1? Especially as data sets grow (yay), and are assembled using scripts rather than by error-prone, non-reproducable hands (double yay), scientists are increasingly less likely to deeply look at our data. That's bad -- don't be that person.
 
-```{r, eval=FALSE}
+```{r, eval=TRUE}
 VisualizeData <- function(phy, data) {
 	#Important here is to LOOK at your data before running it. Any weird values? Does it all make sense? What about your tree? Polytomies?
-    
-    # Now write the code to use VisualizeData() to actually look at your data
-
+  plot(phy)
+  for (i in 1:3){
+    counts <- table(data[,i])
+    barplot(counts,main=colnames(data)[i])}
+  number.missing <- NA
+  for (i in 1:3){
+    number.missing[i] <- sum(is.na(data[,i]))}
+  missingtable <- rbind(c("Data Type",colnames(data)),c("Number missing", number.missing))
+  rightspecies <- c("Same number of species in data and tree?", length(rownames(data))==length(phy$tip.label))
+  return(c(rightspecies, missingtable))
 }
+
+VisualizeData(cleaned.tree.beetles,cleaned.discrete)
+
+# I visualize my data through bar graphs that tell the number of occurance of each discrete state. I also visualize the tree. I return whether the data and the tree contain the same number of species. I also return the number of missing data for each data set.
+    
 ```
 
-First, let's use parsimony to look at ancestral states:
+**First, let's use parsimony to look at ancestral states:**
 
-```{r, eval=FALSE}
-cleaned.discrete.phyDat <- phangorn::phyDat(cleaned.discrete, type="______________") #phyDat is a data format used by phangorn
-anc.p <- phangorn::ancestral.pars(tree, cleaned.discrete.phyDat)
-plotAnc(tree, anc.p, 1)
+```{r, eval=TRUE}
+#phyDat is a data format used by phangorn
+cleaned.discrete.phyDat.gbif <- phangorn::phyDat(cleaned.discrete[,1], type="USER", levels=c("cold","warm", "both"))
+anc.p.gbif <- phangorn::ancestral.pars(cleaned.tree, cleaned.discrete.phyDat.gbif)
+plotAnc(cleaned.tree, anc.p.gbif, 1)
+
+cleaned.discrete.phyDat.inv <- phangorn::phyDat(cleaned.discrete[,2], type="USER", levels=c("Y","N"))
+anc.p.inv <- phangorn::ancestral.pars(cleaned.tree, cleaned.discrete.phyDat.inv)
+plotAnc(cleaned.tree, anc.p.inv, 1)
+
+cleaned.discrete.phyDat.col <- phangorn::phyDat(cleaned.discrete[,3], type="USER", levels=c("black","brown","yellow", "gold"))
+anc.p.col <- phangorn::ancestral.pars(cleaned.tree, cleaned.discrete.phyDat.col)
+plotAnc(cleaned.tree, anc.p.col, 1)
 ```
 
-Do you see uncertainty? What does it mean?
+**Do you see uncertainty? What does it mean?**
 
-Now, plot the likelihood estimates. 
+There is uncertainty in some of the ancestral nodes when mapping elytron color. When using maximum parsimony to estimate ancestral states, the goal is to minimize the number of historical character state changes in order to produce the states seen in the tips. When there is uncertainty, there is not just one solution that best minimizes the number of transitions between historical character states. (Pagel 1999)
 
-```{r, eval=FALSE}
-anc.ml <- ancestral.pml(pml(tree, cleaned.discrete.phyDat), type="ml")
-plotAnc(tree, anc.ml, 1)
+**Now, plot the likelihood estimates.** 
+
+```{r, eval=TRUE}
+anc.ml.gbif <- ancestral.pml(pml(cleaned.tree, cleaned.discrete.phyDat.gbif), type="ml")
+plotAnc(cleaned.tree, anc.ml.gbif, 1)
+
+anc.ml.inv <- ancestral.pml(pml(cleaned.tree, cleaned.discrete.phyDat.inv), type="ml")
+plotAnc(cleaned.tree, anc.ml.inv, 1)
+
+anc.ml.col <- ancestral.pml(pml(cleaned.tree, cleaned.discrete.phyDat.col), type="ml")
+plotAnc(cleaned.tree, anc.ml.col, 1)
 ```
 
-How does this differ from parsimony? 
+**How does this differ from parsimony?**
+The results of the liklihood estimates and maximum parsimony are similar for all three character states, but some of the internal nodes for elytron color estimations show different levels of uncertainties and estimations of states.
 
-Why does it differ from parsimony?
+**Why does it differ from parsimony?**
+Instead of trying to minimize the number of historical character changes, maximum liklihood instead estimates ancestral traits that make the data collected on the tip species most probable. Maximum liklihood estimates transition rates between character states in order to infer the most likly ancestral states.Maximum liklihood estimates are not always the most parimonous. (Pagel 1999)
 
-What does uncertainty mean?
+**What does uncertainty mean?**
+Uncertainty in maximum liklihood means that there is uncertainty in our estimate for the ancestral state parameter.  
 
-Now, to the biological questions. For many of these, `corHMM` will be a useful package.
+**Now, to the biological questions. For many of these, `corHMM` will be a useful package.**
 
-1. How can you estimate transition rates between states? Do it.
-2. How could you examine if transition rates are equal?
-3. Think about the Lewis (2001) MKV model. Are your traits all variable? Will using this make sense for your data? Try using it. Do results change?
-4. How could you test order of state evolution?
+*1. How can you estimate transition rates between states? Do it.*
+```{r, eval=TRUE}
+### Estimates transition rates between all three characters (climate, invasiveness in US, and color).
+edited.cleaned.discrete <- cbind(rownames(cleaned.discrete), cleaned.discrete)
+
+rayDISC(cleaned.tree.beetles, edited.cleaned.discrete[,1:2], node.states="marginal")
+rayDISC(cleaned.tree.beetles, edited.cleaned.discrete[,c(1,3)], node.states="marginal")
+rayDISC(cleaned.tree.beetles, edited.cleaned.discrete[,c(1,4)], node.states="marginal")
+```
+*2. How could you examine if transition rates are equal?*
+The above functions returns a matrix with transition rates from a-->b and b-->a ("a" and "b" are two states of an example character). If the rates in both directions are of equal value, we can see if the transition rates are equal. For all three of the characters examine, the transition rates between states are equal. 
+
+*3. Think about the Lewis (2001) MKV model. Are your traits all variable? Will using this make sense for your data? Try using it. Do results change?*
+
+All of my traits are variable. Using a Lewis MKV model may make sense for this data because this model tries to correct for bias introduced by only using variable traits to estimate branch length (Lewis 2001). 
+
+```{r, eval = TRUE}
+MKVmodel.tree <- lewisMkv(cleaned.tree.beetles, edited.cleaned.discrete)$phy
+par(mfrow=c(1,2))
+plot(cleaned.tree.beetles,main="Original Tree")
+plot(MKVmodel.tree, main="MKV Model")
+```
+
+Using a Lewis MKV model, the topography of the tree changed significantly. Furthermore, using the MKV model resulted in a polytomy of species *O. vacca*, *O. similis*, and *O. coenibata*.
+
+*4. How could you test order of state evolution?*
+By mapping inferred ancestral traits on the internal nodes of a tree, we can answer questions about the order of state evolution. We can infer that a state on an ancestral node evolved before the state of a species on the tip. To rigorously test your hypotheses about the order of state evolution, it is ideal to use multiple methods of ancestral state reconstruction. Also, because ancestral state reconstruction relies on tree topography, it is also ideal to use multiple methods to estimate tree topography and branch length. 

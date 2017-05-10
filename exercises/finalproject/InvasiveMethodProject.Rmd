@@ -1,0 +1,69 @@
+---
+title: "PhyloMeth Invasion Project"
+author: "M Mamantov"
+date: "April 6, 2017"
+output: html_document
+---
+
+Install all necessary packages.
+
+```{r, eval=TRUE, include=TRUE, echo=TRUE, message=FALSE, warning=FALSE}
+#install.packages(c("ape","geiger", "OUwie", "TreeSim"))
+library(ape)
+library(geiger)
+library(OUwie)
+library(TreeSim)
+library(phytools)
+set.seed(1859)
+```
+
+Simulate a tree using a birth-death process where speciation rate is two and extinction rate is 0.5. Only include extant taxa.
+```{r, eval=TRUE}
+tree <- sim.bd.taxa(n=25,numbsim=1,lambda=2,mu=0.5,complete=FALSE)[[1]]
+plot(tree)
+```
+
+Simulate a rate matrix based on invasion stats. There are four possible states: Naturalized native species with low plasticity (1), naturalized native with high plasticity (2), young invasive (3), and old invasive (4).
+
+```{r, eval=TRUE}
+rate.matrix <- matrix(data=c(-0.9,0.2,0,0,0.8,-.7,0,0.1,0.1,0.5,-0.5,0,0,0,0.5,-0.1), nrow=4, ncol=4)
+rownames(rate.matrix) <- c("NNL","NNH","NI","OI")
+colnames(rate.matrix) <- c("NNL","NNH","NI","OI")
+rate.matrix
+```
+
+Use the tree to simulate data, using the `sim.char` function in `geiger`.First, I simulate continous plasticity data, which represents the absolute value of reaction norm slope. Then, I simulate data for invasion state using the rate matrix created above. 
+
+```{r, eval=TRUE}
+plasticity.data <- sim.char(tree,.2,model="BM",root=0.5)
+invasion.data <- sim.char(tree, rate.matrix, model="discrete",root=1)
+while(length(unique(invasion.data))!=4) {
+  invasion.data <- sim.char(tree, rate.matrix, model="discrete",root=1)
+}
+
+full.data <- cbind.data.frame(invasion.data, plasticity.data)
+colnames(full.data)<-c("Invasive Status","Plasticity")
+full.data
+```
+
+Now, perform stochastic character mapping of invasive state.
+
+```{r, eval=TRUE, message=FALSE}
+traits.tree <- make.simmap(tree, x = invasion.data[,,1], model = "ARD", nsim=1, pi=c(.5,.5,0,0))
+plotSimmap(traits.tree)
+legend("bottomleft", legend=c("NNL","NNH","NI","NO"),lwd=1, bty="n", col=c("black","red","green","blue"))
+```
+
+Use OUwie to calculate the optimum trait values along each branch of the tree (thedas).
+
+```{r, eval=TRUE}
+OUwie.data <- cbind.data.frame(rownames(full.data),invasion.data,plasticity.data)
+results <- OUwie(traits.tree,OUwie.data,model="OUM",simmap.tree=TRUE)
+results
+```
+
+Is plasticity driving invasions?
+```{r, eval=TRUE}
+thetas <- results$theta[,1]
+barplot(height=thetas, ylab= "Optimum Plasticity Value", names.arg= c("NNL","NNH","NI","OI"))
+```

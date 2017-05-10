@@ -1,13 +1,14 @@
 ---
 title: "Diversification"
-author: "Brian O'Meara"
+author: "Brian O'Meara + Maggie Mamantov"
 date: "3/21/2017"
 output: html_document
 ---
 
-```{r setup, include=FALSE}
+```{r setup, include=TRUE}
 knitr::opts_chunk$set(echo = TRUE, cache=TRUE)
 set.seed(1859)
+options(repos = "http://cran.us.r-project.org")
 ```
 
 ## Tree only models
@@ -15,16 +16,14 @@ set.seed(1859)
 First, install and load ape ([Paradis et al., 2004](https://doi.org/10.1093/bioinformatics/btg412)), TreeSim ([Stadler, 2011](http://dx.doi.org/10.1093/sysbio/syr029)), geiger ([Harmon et al., 2008](https://doi.org/10.1093/bioinformatics/btm538)), diversitree ([FitzJohn 2012](http://onlinelibrary.wiley.com/doi/10.1111/j.2041-210X.2012.00234.x/abstract)) and hisse ([Beaulieu & O'Meara, 2016](https://doi.org/10.1093/sysbio/syw022)). For the latter, it's probably best to load the cutting edge github version.
 
 ```{r, include=TRUE, echo=TRUE, message=FALSE, warning=FALSE}
-install.packages(c("ape", "TreeSim", "geiger", "diversitree", "devtools"))
 library(ape)
 library(TreeSim)
 library(geiger)
 library(diversitree)
-devtools::install_github("thej022214/hisse")
 library(hisse)
 ```
 
-Let's initially look just at diversification alone. Simulate a 30 taxon tree with only speciation, no extinction:
+Let's initially look just at diversification alone. Simulate a 300 taxon tree with only speciation, no extinction:
 
 ```{r}
 my.tree <- TreeSim::sim.bd.taxa(n=300, numbsim=1, lambda=0.1, mu=0)[[1]]
@@ -32,8 +31,8 @@ my.tree <- TreeSim::sim.bd.taxa(n=300, numbsim=1, lambda=0.1, mu=0)[[1]]
 
 As always, plot it:
 
-```{r}
-stop("How to plot a tree")
+```{r, eval=TRUE}
+plot(my.tree, show.tip.label=FALSE)
 ```
 
 One way to look at trees, and actually what many methods reduce to under the hood, is lineage through time plots. 
@@ -52,7 +51,7 @@ We can look at multiple trees:
 
 ```{r}
 yule.trees <- TreeSim::sim.bd.taxa(n=300, numbsim=10, lambda=0.1, mu=0, complete=FALSE)
-stop("How to do a multiple ltt plot?")
+mltt.plot(yule.trees)
 
 ```
 
@@ -99,11 +98,73 @@ legend("topleft", legend=c("Birth Death", "Yule"), fill=colors)
 
 So even though the the net diversification rate is the same, there are very different patterns: in theory, one can estimate both birth and death rates from these trees. In practice, of course, with rates that change over time due to mass extinctions or trait evolution, missing taxa, etc. it can practically be hard to tell these apart.
 
-**TODO** Try plotting some with other diversification parameters. What happens if speciation rate is much higher than extinction rate? How does the simulation change with different values, but keeping their difference constant? If their sum is constant? [remember to change to `eval=TRUE` to run]
+**Try plotting some with other diversification parameters.**
 
-```{r, eval=FALSE}
-my.trees <- TreeSim::sim.bd.taxa(n=300, numbsim=10, lambda=stop("CHOOSE YOUR VALUES"), mu=stop("CHOOSE YOUR VALUES"), complete=FALSE)
-ape::mltt.plot(my.trees, log="y", legend=FALSE)
+*What happens if speciation rate is much higher than extinction rate?*
+When sepeciation rate is much higher than extinction rate, the curve begins to look like a Yule model with no extinction. Also, the curves reaches the number of extant taxa more gradually when speciation rate is higher than extinction rate (grey curves) than when the two rates are close together (red curves). 
+
+```{r, eval=TRUE}
+high.trees <- TreeSim::sim.bd.taxa(n=300, numbsim=10, lambda=1, mu=0.1, complete=FALSE)
+low.trees <- TreeSim::sim.bd.taxa(n=300, numbsim=10, lambda=1, mu=0.95, complete=FALSE)
+
+depth.range <- range(unlist(lapply(high.trees,ape::branching.times)), unlist(lapply(low.trees,ape::branching.times)))
+max.depth <- sum(abs(depth.range)) #ape rescales depths
+plot(x=c(0, -1*max.depth), y=c(1, ape::Ntip(high.trees[[1]])), log="y", type="n", bty="n", xlab="Time", ylab="N")
+colors=c(rgb(1,0,0,0.5), rgb(0, 0, 0, 0.5))
+list.of.both <- list(high.trees, low.trees)
+for (i in sequence(2)) {
+    tree.list <- list.of.both[[i]]
+    for (j in sequence(length(tree.list))) {
+        ape::ltt.lines(tree.list[[j]], col=colors[[i]])   
+    }
+}
+legend("topleft", legend=c("b=1,d=0.95", "b=1,d=0.1"), fill=colors)
+```
+
+*How does the simulation change with different values, but keeping their difference constant?* 
+
+Both simulations produce curves with the same, overall general shape. The simulation with higher speciation/extinction rates reaches the extant number of lineages slower(has older lineages) than the simulation with lower speciation/extinction rates even though the difference between rates is constant in both simulations. 
+
+```{r, eval=TRUE}
+my.trees1 <- TreeSim::sim.bd.taxa(n=300, numbsim=10, lambda=0.8, mu=0.7, complete=FALSE)
+my.trees2 <- TreeSim::sim.bd.taxa(n=300, numbsim=10, lambda=0.2, mu=0.1, complete=FALSE)
+ape::mltt.plot(my.trees1, log="y", legend=FALSE)
+ape::mltt.plot(my.trees2, log="y", legend=FALSE)
+
+depth.range <- range(unlist(lapply(my.trees1,ape::branching.times)), unlist(lapply(my.trees2,ape::branching.times)))
+max.depth <- sum(abs(depth.range)) #ape rescales depths
+plot(x=c(0, -1*max.depth), y=c(1, ape::Ntip(my.trees1[[1]])), log="y", type="n", bty="n", xlab="Time", ylab="N")
+colors=c(rgb(1,0,0,0.5), rgb(0, 0, 0, 0.5))
+list.of.both <- list(my.trees1, my.trees2)
+for (i in sequence(2)) {
+    tree.list <- list.of.both[[i]]
+    for (j in sequence(length(tree.list))) {
+        ape::ltt.lines(tree.list[[j]], col=colors[[i]])   
+    }
+}
+legend("topleft", legend=c("b=0.3,d=0.2", "b=0.8,d=0.7"), fill=colors)
+```
+
+*If their sum is constant?*
+
+The shape of the curvs vary, even with holding the sum of the rates constant. The curves where the speciation rate and extinction rate are more different reaches the number extant lineages at a slow, more gradual pace than the curve were the two rates are similar. 
+
+```{r, eval=TRUE}
+my.trees3 <- TreeSim::sim.bd.taxa(n=300, numbsim=10, lambda=.5, mu=0.4, complete=FALSE)
+my.trees4 <- TreeSim::sim.bd.taxa(n=300, numbsim=10, lambda=.6, mu=0.3, complete=FALSE)
+
+depth.range <- range(unlist(lapply(my.trees3,ape::branching.times)), unlist(lapply(my.trees4,ape::branching.times)))
+max.depth <- sum(abs(depth.range)) #ape rescales depths
+plot(x=c(0, -1*max.depth), y=c(1, ape::Ntip(my.trees3[[1]])), log="y", type="n", bty="n", xlab="Time", ylab="N")
+colors=c(rgb(1,0,0,0.5), rgb(0, 0, 0, 0.5))
+list.of.both <- list(my.trees3, my.trees4)
+for (i in sequence(2)) {
+    tree.list <- list.of.both[[i]]
+    for (j in sequence(length(tree.list))) {
+        ape::ltt.lines(tree.list[[j]], col=colors[[i]])   
+    }
+}
+legend("topleft", legend=c("b=0.6,d=0.3", "b=0.5,d=0.4"), fill=colors)
 ```
 
 Once you can see that there is some information in the distribution of branch lengths, you can (and people have) make multiple models and compare them: a model where diversification rate slows or speeds up over time generates different predictions from a model where it's constant, for example. There are a wide bestiary of models to compare: models that imply logistic growth to a maximum number of species ("Let's speciate due to the Rockies!" "Wait, we can't: there are too many species of us in China, we're full!"), species age ("I haven't speciated in a while -- I forget how"), mass extinctions ("Incoming rock!!!"), and more. It's important to remember the idea of [dull hypothesis testing](https://bookdown.org/bomeara/comparative-methods/dull-model-testing.html): if you're comparing a complex model versus a simple model, on a messy, real dataset, you're probably going to reject a simple model, even if the complex model isn't true. It's also worth looking at parameter estimates: if you find your group is undergoing logistic growth, what is the carrying capacity? If it's a group of 26 species, and the carrying capacity is 27, that's very different from finding a carrying capacity of 5000. The effect of missing species can also be significant (simulation to test for this effect can be important). There are also methods, like Medusa ([Alfaro et al., 2009](http://www.pnas.org/content/106/32/13410.abstract)) and BAMM ([Rabosky, 2014[(http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0089543)) that attempt to infer where on a tree diversification rate shifts have happened, though I'd currently (March 2017) caution against their use as the basis for a study (but using them to complement results gotten another way could be informative).
@@ -141,7 +202,7 @@ plot(phy)
 knitr::kable(cbind(sim.dat, true.char=sim.dat.true$phy.tip.state))
 ```
 
-Rather than optimizing $\lambda_i$ and $\mu_i$ separately, hisse optimizes transformations of these variables. Here we let $\tau_i = \lambda_i+\mu_i$ define “net turnover”, and we let $\epsilon_i = \mu_i / \lambda_i$ define the "extinction fraction". This reparameterization alleviates problems associated with over-fitting when $\lambda_i$ and $\mu_i$ are highly correlated, but both matter in explaining the diversity pattern (see discussion of this issue in Beaulieu and O'Meara 2016). The number of free parameters in the model for both net turnover and extinction fraction are specified as index vectors provided to the function call. Each vector contains four entries that correspond to rates associated with the observed states (0 or 1) and the hidden states (A or B). They are ordered as follows: 0A, 1A, 0B, 1B. Note that the index vector can also be set up such that parameters are linked among states or even dropped from the model entirely. 
+Rather than optimizing $\lambda_i$ and $\mu_i$ separately, hisse optimizes transformations of these variables. Here we let $\tau_i = \lambda_i+\mu_i$ define net turnover, and we let $\epsilon_i = \mu_i / \lambda_i$ define the "extinction fraction". This reparameterization alleviates problems associated with over-fitting when $\lambda_i$ and $\mu_i$ are highly correlated, but both matter in explaining the diversity pattern (see discussion of this issue in Beaulieu and O'Meara 2016). The number of free parameters in the model for both net turnover and extinction fraction are specified as index vectors provided to the function call. Each vector contains four entries that correspond to rates associated with the observed states (0 or 1) and the hidden states (A or B). They are ordered as follows: 0A, 1A, 0B, 1B. Note that the index vector can also be set up such that parameters are linked among states or even dropped from the model entirely. 
 
 Let's walk through a couple of examples. Take, for instance, the following index vectors:
 ```{r, eval=TRUE}
@@ -197,9 +258,10 @@ trans.rates.bisse = TransMatMaker(hidden.states=FALSE)
 trans.rates.bisse
 ```
 Whatever transition matrix is designed, it is supplied to the `trans.rate=` argument in the `hisse()` call:
-```{r, eval=FALSE}
-pp = hisse(phy, sim.dat, f=c(1,1), hidden.states=TRUE, turnover.anc=turnover.anc, 
+```{r, eval=TRUE}
+pp <- hisse(phy, sim.dat, f=c(1,1), hidden.states=TRUE, turnover.anc=turnover.anc, 
            eps.anc=eps.anc, trans.rate=trans.rates.nodual.allequal)
+pp
 ```
 
 ## A common mistake
@@ -220,6 +282,7 @@ By default, hisse outputs turnover and extinction fraction. I recognize, of cour
 ```{r, eval=FALSE}
 pp = hisse(phy, sim.dat, f=c(1,1), hidden.states=TRUE, turnover.anc=turnover.anc, 
            eps.anc=eps.anc, trans.rate=trans.rates.nodual.allequal, output.type="net.div")
+pp
 ```
 
 ## Setting up the 2-state character-independent (CID-2) model
@@ -227,7 +290,7 @@ Recently Rabosky and Goldberg (2015) raised a very important concern with SSE mo
 
 This touches on a much larger issue, which is that we've relied on rather trivial "null"" models (i.e., equal rates diversification) to compare against models of trait dependent diversification. Again, it is important to stress that SSE models are not models of trait evolution, but rather joint models for the tree and the trait where they are maximizing the probability of the observed states at the tips and the observed tree, given the model. So, if a tree violates a single regime birth-death model due to any number of causes, then even if the tip data are perfectly consistent with a simple model, the tip data plus the tree are not. In such cases, then, it should not be surprising that a more complex model will tend to be chosen over a nested simpler model, particularly if the underlying tree is large enough. A fairer comparison would need to involve some sort of "null" model that contains the same degree of complexity in terms of numbers of parameters for diversification, but is also independent of the evolution of the focal character, to allow for comparisons among any complex, trait-dependent models of interest.
 
-In Beaulieu and O'Meara (2016), we proposed two such models. These character-independent (CID) models explicitly assume that the evolution of a binary character is independent of the diversification process without forcing the diversification process to be constant across the entire tree. The first model, which we refer to as "CID-2”, contains four diversification process parameters that account for trait-dependent diversification solely on the two states of an unobserved, hidden trait. In this way, CID-2 contains the same amount of complexity in terms of diversification as a BiSSE model. The second model, which we refer to as “CID-4” contains the same number of diversification parameters as in the general HiSSE model that are linked across four hidden states. In the case of the CID=4 model, we have implemented a separate function, `hisse.null4()` that should be fairly self-explanatory. However, rather than implementing a separate function for the "CID-2" model, we found it is easier to just set it up and test it using the `hisse()` function. This section describes how to do this.
+In Beaulieu and O'Meara (2016), we proposed two such models. These character-independent (CID) models explicitly assume that the evolution of a binary character is independent of the diversification process without forcing the diversification process to be constant across the entire tree. The first model, which we refer to as "CID-2a, contains four diversification process parameters that account for trait-dependent diversification solely on the two states of an unobserved, hidden trait. In this way, CID-2 contains the same amount of complexity in terms of diversification as a BiSSE model. The second model, which we refer to as CID-4a contains the same number of diversification parameters as in the general HiSSE model that are linked across four hidden states. In the case of the CID=4 model, we have implemented a separate function, `hisse.null4()` that should be fairly self-explanatory. However, rather than implementing a separate function for the "CID-2" model, we found it is easier to just set it up and test it using the `hisse()` function. This section describes how to do this.
 
 Remember, the goal is to set up a model where the diversification process is independent from the observed states (0 or 1) of the focal trait. In other words, diversification rate differences, if they exist, will only be associated with one of the hidden states (A or B) regardless of the state of the focal trait. Thus, the free parameters for diversification would look like this: 
 ```{r, eval=TRUE}
@@ -266,6 +329,7 @@ As before, turnover.anc, eps.anc, and the transition rate matrix are supplied as
 ```{r, eval=FALSE}
 pp = hisse(phy, sim.dat, f=c(1,1), hidden.states=TRUE, turnover.anc=turnover.anc, 
            eps.anc=eps.anc, trans.rate=trans.rates.nodual.allequal)
+pp
 ```
 and the results can be compared against any model in the hisse set, including BiSSE.
 
@@ -323,6 +387,7 @@ plot.hisse.states(hisse.results.list, rate.param="net.div", show.tip.label=FALSE
 Although this is similar to the plot above, which shows no real rate differences, it actually accounts for both the uncertainty in the model as well as the reconstructions. Note that there are many features that can be adjusted in `plot.hisse.states()`, which is described in detail in the manual.
 
 Note that the above code is obviously a pretty lame way of generating a list. An even easier way would be to do something like this:
+**This doesn't seem to work with a windows computer, ls is not a recognzied command**
 ```{r, eval=FALSE}
 # First, suck in all the files with .Rsave line ending in your working directory:
 files = system("ls -1 | grep .Rsave", intern=TRUE)
@@ -337,8 +402,69 @@ for(i in sequence(length(files))){
 ```
 
 ## Your data
+I'm going to use invasion stage data generated for my final project since I don't currently have empricical data. I generate it here, using the same rate matrix. I'm creating data with four invasions stages: native, not likely to invade (1); native, likely to invade (2); invader, new invasion (3); invader, old invasion (4).
 
-```{r}
-stop("Now run with your own data")
+```{r,eval=TRUE}
+tree <- sim.bd.taxa(n=50,numbsim=1,lambda=2,mu=0.5,complete=FALSE)[[1]]
+rate.matrix <- matrix(data=c(-0.9,0.2,0,0,0.8,-.7,0,0.1,0.1,0.5,-0.5,0,0,0,0.5,-0.1), nrow=4, ncol=4)
+
+invasion.data <- sim.char(tree, rate.matrix, model="discrete",root=1)
+while(length(unique(invasion.data))!=4) {
+  invasion.data <- sim.char(trees.tree, rate.matrix, model="discrete",root=1)
+}
+
+invasion.dat.true <- data.frame(tree$tip.label, tip.state=invasion.data[,,1])
+invasion.dat <- data.frame(tree$tip.label, tip.state=rep(NA,50))
+# Now to hide the "hidden" state -> collapsing traits into native (0) or invasive (1)
+for (i in 1:50){
+  if (invasion.dat.true[i,2]==1){
+    invasion.dat[i,2] <- 0
+  }
+  if (invasion.dat.true[i,2]==2){
+    invasion.dat[i,2] <- 0
+  }
+  if (invasion.dat.true[i,2]==3){
+    invasion.dat[i,2] <- 1
+  }
+   if (invasion.dat.true[i,2]==4){
+    invasion.dat[i,2] <- 1
+  }
+}
 ```
 
+Make sure to look at it.
+```{r}
+plot(tree)
+knitr::kable(cbind(invasion.dat, true.char=invasion.dat.true$tip.state))
+```
+
+Create our turnover rate and extinction fraction for a full HISSE model. I use a Yull model (all birth) for extinction fraction. 
+```{r}
+turnover.anc = c(1,2,3,4)
+eps.anc = c(0,0,0,0)
+```
+
+Let's make our rate matrix. I'm going to remove dual rates (double transitions), but allow each rate to vary. 
+```{r}
+inv.trans.rates = TransMatMaker(hidden.states=TRUE)
+inv.trans.rates= ParDrop(inv.trans.rates, c(3,5,8,10))
+inv.trans.rates
+```
+
+Now, I can run the HISSE model. 
+```{r}
+inv.model <- hisse(tree, invasion.dat, f=c(1,1), hidden.states=TRUE, turnover.anc=turnover.anc, 
+           eps.anc=eps.anc, trans.rate=inv.trans.rates,output.type="net.div")
+inv.model
+```
+
+The output gives me net diversification of each trait. Native species with a low ability to invade have net diversification of 2.97 while native species with high ability to invade have net diversification of 1.77. New invaders have net diversification of 1.63 while old invaders have diversification of 1.08. These results indicate that being a native species increases diversification. 
+
+Plot it.
+```{r, eval=TRUE}
+
+inv.recon <- MarginRecon(tree, invasion.dat, f=c(1,1), hidden.states=TRUE, pars=inv.model$solution, 
+                       aic=inv.model$AIC)
+clas(inv.recon)
+plot.hisse.states(inv.recon, rate.param="net.div", show.tip.label=FALSE)
+```
