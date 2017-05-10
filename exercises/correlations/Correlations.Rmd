@@ -4,9 +4,9 @@ You can do this on your own data, or on included data here.
 
 ##Continuous data
 
-```{r, eval=FALSE}
+```{r, eval=TRUE}
 library(geiger)
-library(pic)
+library(ape)
 tree.primates <- read.tree(text="((((Homo:0.21,Pongo:0.21):0.28,Macaca:0.49):0.13,Ateles:0.62):0.38,Galago:1.00);") #using examples from ape ?pic
 X <- c(4.09434, 3.61092, 2.37024, 2.02815, -1.46968)
 Y <- c(4.74493, 3.33220, 3.36730, 2.89037, 2.30259)
@@ -19,7 +19,7 @@ Now, positivitize the contrasts and do a regression through the origin.
 
 ##Discrete data
 
-```{r, eval=FALSE}
+```{r, eval=TRUE}
 require("corHMM")
 ?corHMM
 data(primates)
@@ -34,7 +34,7 @@ For actual analyses, of course, DO NOT INVENT YOUR DATA.
 
 First, a review of discrete state models:
 
-```{r, eval=FALSE}
+```{r, eval=TRUE}
 primates$trait[which(grepl("Hylobates",primates$trait[,1])),2]<-1
 
 trait1<-primates$trait[,2]
@@ -46,21 +46,21 @@ print(rate.mat.er)
 
 What does this matrix mean?
 
-```{r, eval=FALSE}
+```{r, eval=TRUE}
 pp.er<-corHMM(primates$tree,primates$trait[,c(1,2)],rate.cat=1,rate.mat=rate.mat.er,node.states="marginal")
 print(pp.er)
 ```
 
 What do these results mean?
 
-```{r, eval=FALSE}
+```{r, eval=TRUE}
 rate.mat.ard<-rate.mat.maker(rate.cat=1, hrm=FALSE, ntraits=1, nstates=2, model="ARD")
 print(rate.mat.ard)
 ```
 
 And these?
 
-```{r, eval=FALSE}
+```{r, eval=TRUE}
 pp.ard<-corHMM(primates$tree,primates$trait[,c(1,2)],rate.cat=1,rate.mat=rate.mat.ard,node.states="marginal")
 print(pp.ard)
 ```
@@ -71,14 +71,14 @@ Now let's look at multiple traits.
 
 This is a matrix with four states
 
-```{r, eval=FALSE}
+```{r, eval=TRUE}
 rate.mat.er.4state<-rate.mat.maker(rate.cat=1, hrm=FALSE, ntraits=1, nstates=4, model="ER")
 print(rate.mat.er.4state)
 ```
 
 Convert the two binary traits into a single four character state
 
-```{r, eval=FALSE}
+```{r, eval=TRUE}
 fourstate.trait<-rep(NA,Ntip(primates$tree))
 for(i in sequence(Ntip(primates$tree))) {
 	if(primates$trait[i,2]==0 && primates$trait[i,3]==0) {
@@ -104,7 +104,7 @@ print(rate.mat.ard.4state)
 
 Now let's make the equivalent of a GTR matrix:
 
-```{r, eval=FALSE}
+```{r, eval=TRUE}
 rate.mat.gtr.4state<-rate.mat.ard.4state
 rate.mat.gtr.4state<-rate.par.eq(rate.mat.gtr.4state, c(1,4))
 rate.mat.gtr.4state<-rate.par.eq(rate.mat.gtr.4state, c(2,6))
@@ -120,10 +120,10 @@ print(rayDISC(primates$tree, fourstate.data, ntraits=1, rate.mat= rate.mat.gtr.4
 
 Now make a model like Pagel 1994
 
-```{r, eval=FALSE}
+```{r, eval=TRUE}
 print(rate.mat.maker(rate.cat=1, hrm=FALSE, ntraits=2, nstates=2, model="ARD"))
 rate.mat.pag94<-rate.par.drop(rate.mat.ard.4state, drop.par=c(3,5,8,10))
-print
+print(rate.mat.pag94)
 ```
 
 Now that you have some introduction, there are two routes:
@@ -131,11 +131,55 @@ Now that you have some introduction, there are two routes:
 ##Route 1
 
 **Construct a model to test if state 1 can never be lost**
+```{r}
+keepstate1mat <- rate.mat.maker(rate.cat=1, hrm=FALSE, ntraits=1, nstates=4, model="ER")
+keepstate1mat[2,] <- NA
+keepstate1 <- rayDISC(primates$tree, fourstate.data, ntraits=1, rate.mat= losingstate1mat, node.states="marginal", model="ARD")
+
+losingstate1mat <-rate.mat.maker(rate.cat=1, hrm=FALSE, ntraits=1, nstates=4, model="ER")
+losingstate1 <- rayDISC(primates$tree, fourstate.data, ntraits=1, rate.mat= losingstate1mat, node.states="marginal", model="ARD")
+
+keepstate1$AICc
+losingstate1$AICc
+
+```
+
 
 **Experiment with the effects of frequencies at the root.**
+```{r}
+root.1 <- rayDISC(primates$tree, fourstate.data, ntraits=1, node.states="marginal", model="ARD",root.p = c(1,0,0,0))
+AICc1 <- root.1$AICc
+
+root.2 <- rayDISC(primates$tree, fourstate.data, ntraits=1, node.states="marginal", model="ARD",root.p = c(0,1,0,0))
+AICc2 <- root.2$AICc
+
+root.3 <- rayDISC(primates$tree, fourstate.data, ntraits=1, node.states="marginal", model="ARD",root.p = c(0,0,1,0))
+AICc3 <- root.3$AICc
+
+root.4 <- rayDISC(primates$tree, fourstate.data, ntraits=1, node.states="marginal", model="ARD",root.p = c(0,0,0,1))
+AICc4 <- root.4$AICc
+c(AICc1,AICc2,AICc3,AICc4)
+```
 
 **Create and use a model to see if transitions from 00 go to 11 only via 01.**
+```{r}
+alltransitions <- rate.mat.maker(rate.cat=1, hrm=FALSE, ntraits=2, nstates=2, model="ER")
+alltransitions[1,4] <- alltransitions[4,1] <- 1
+defaultmodel <- corDISC(primates$tree, primates$trait, ntraits=2, rate.mat=alltransitions, node.states="marginal", model="ARD")
+
+orderedtransitions <- rate.mat.maker(rate.cat=1, hrm=FALSE, ntraits=2, nstates=2, model="ER")
+
+ordered.model <- corDISC(primates$tree, primates$trait, ntraits=2, rate.mat=orderedtransitions, node.states="marginal", model="ARD")
+defaultmodel$AICc
+ordered.model$AICc
+```
+
 
 ##Route 2
 
 Maddison and FitzJohn (2015) pretty convincingly show (to me) that Pagel (1994) is just not a good method. Ok. So work on a fix. They point to [Read and Nee (1995)](http://dx.doi.org/10.1006/jtbi.1995.0047) as a low power but possible solution. Look at their appendix, especially, and write an implementation.
+
+
+
+
+

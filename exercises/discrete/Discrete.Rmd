@@ -5,21 +5,13 @@ date: "2/16/2017"
 output: html_document
 ---
 
-For this exercise, explore looking at discrete character models. Note: they are not "discreet" character models -- they're actually pretty noisy.
+For this exercise, explore looking at discrete character models.
 
-Remember for homework, 
-
-`git remote -v` gives list of remotes
-
-`git fetch upstream`
-
-`git pull upstream master` pulls from upstream (me).
-
-change `eval=TRUE` for all the R blocks, debug, commit, and do a pull request.
+Remember for homework, change `eval=TRUE` for all the R blocks, debug, commit, and do a pull request.
 
 These are useful packages in this area (far from exhaustive list).
 
-```{r, eval=TRUE}
+```{r libraries, include=FALSE}
 library(ape)
 library(geiger)
 library(phytools)
@@ -29,59 +21,128 @@ library(corHMM)
 
 You'll need to get data into R in some way. 
 
-```{r, eval=FALSE}
-tree <- read.tree("____PATH_TO_TREE_OR_SOME_OTHER_WAY_OF_GETTING_A_TREE____")
-discrete.data <- read.csv(file="____PATH_TO_DATA_OR_SOME_OTHER_WAY_OF_GETTING_TRAITS____", stringsAsFactors=FALSE) #death to factors.
+```{r}
+tree <- read.tree("/Users/pmckenz1/Desktop/plant_list/Feb16_class/RAxML_bestTree.tre")
+discrete.data.full <- read.csv(file="/Users/pmckenz1/Desktop/plant_list/Feb16_class/species_characters.csv", stringsAsFactors=F) #death to factors.
+discrete.data <- discrete.data.full[,3:ncol(discrete.data.full)]
+row.names(discrete.data) <- discrete.data.full$tree_tips
 ```
 
 Data are often not right in some way. They might not match the taxa in your tree, there may be missing data, etc. `geiger::treedata` is a great function for getting a tree and data that match, but your data may need other cleaning. Do it as a function so it's repeatable.
 
-```{r, eval=FALSE}
+```{r}
 CleanData <- function(phy, data) {
-	#treedata() in Geiger is probably my favorite function in R.
+  keep.row <- logical(0)
+  for (i in 1:nrow(data)) {
+    if (sum(!is.na(data[i,])) > 0) {
+      keep.row <- c(keep.row,T)
+    }
+    if (sum(!is.na(data[i,])) == 0) {
+      keep.row <- c(keep.row,F)
+    }
+  }
+  data_without_NA <- data[keep.row,]
+	return(treedata(phy,data_without_NA))#treedata() in Geiger is probably my favorite function in R.
 }
 
 # Now write the code to use CleanData() to actually clean your data
+cleaned.tree <- CleanData(phy = tree, data = discrete.data)
+cleaned.tree$data <- cleaned.tree$data[,7:12] #we're actually only interested in the binary data right now.
 
 ```
 
 It's critically important to LOOK at what you have. Are there weird values? Has the match between taxa and state gone correctly? Do you think you have binary data, but there's actually only state 1? Especially as data sets grow (yay), and are assembled using scripts rather than by error-prone, non-reproducable hands (double yay), scientists are increasingly less likely to deeply look at our data. That's bad -- don't be that person.
 
-```{r, eval=FALSE}
+```{r}
 VisualizeData <- function(phy, data) {
-	#Important here is to LOOK at your data before running it. Any weird values? Does it all make sense? What about your tree? Polytomies?
-    
-    # Now write the code to use VisualizeData() to actually look at your data
-
+View(data)
+plotTree(phy)
 }
+VisualizeData(cleaned.tree$phy,cleaned.tree$data)
 ```
 
 First, let's use parsimony to look at ancestral states:
 
-```{r, eval=FALSE}
-cleaned.discrete.phyDat <- phangorn::phyDat(cleaned.discrete, type="______________") #phyDat is a data format used by phangorn
-anc.p <- phangorn::ancestral.pars(tree, cleaned.discrete.phyDat)
-plotAnc(tree, anc.p, 1)
+```{r}
+plot.ancestral.mine <- function (tree, data, i = 1, col = NULL, cex.pie = par("cex"), ###modified plot function
+          pos = "bottomright", ...) {
+  y = subset(data, , i)
+  CEX = cex.pie
+  xrad <- CEX * diff(par("usr")[1:2])/50
+  levels = attr(data, "levels")
+  nc = attr(data, "nc")
+  y = matrix(unlist(y[]), ncol = nc, byrow = TRUE)
+  l = dim(y)[1]
+  dat = matrix(0, l, nc)
+  for (i in 1:l) dat[i, ] = y[[i]]
+  plot(tree, label.offset = 1.1 * xrad, plot = FALSE, ...)
+  lastPP <- get("last_plot.phylo", envir = .PlotPhyloEnv)
+  XX <- lastPP$xx
+  YY <- lastPP$yy
+  xrad <- CEX * diff(lastPP$x.lim * 1.1)/50
+  par(new = TRUE)
+  plot(tree, label.offset = 1.1 * xrad, plot = TRUE,cex = .5, ...)
+  if (is.null(col)) 
+    col = rainbow(nc)
+  if (length(col) != nc) 
+    warning("Length of color vector differs from number of levels!")
+  BOTHlabels(pie = y, XX = XX, YY = YY, adj = c(0.5, 0.5), 
+             frame = "rect", pch = NULL, sel = 1:length(XX), thermo = NULL, 
+             piecol = col, col = "black", bg = "lightblue", horiz = FALSE, 
+             width = NULL, height = NULL, cex = cex.pie)
+  legend(pos,legend = levels,pch =21,col = "black", pt.bg = col,pt.cex = 2,box.lty = 0,cex = 1)
+}
+
+cleaned.discrete.phyDat <- phangorn::phyDat(cleaned.tree$data[,1],type="USER",levels = c(0,1)) #phyDat is a data format used by phangorn
+anc.p <- phangorn::ancestral.pars(cleaned.tree$phy, cleaned.discrete.phyDat)
+plot.ancestral.mine(cleaned.tree$phy, anc.p,1,cex.pie = .5)
 ```
 
-Do you see uncertainty? What does it mean?
+Do you see uncertainty? What does it mean?  
 
-Now, plot the likelihood estimates. 
+    *  Yes, uncertainty at some of the farthest ancestral nodes.  
+    
+**Now, plot the likelihood estimates.**  
 
-```{r, eval=FALSE}
-anc.ml <- ancestral.pml(pml(tree, cleaned.discrete.phyDat), type="ml")
-plotAnc(tree, anc.ml, 1)
+```{r}
+anc.ml <- ancestral.pml(pml(cleaned.tree$phy, cleaned.discrete.phyDat), type="ml")
+plot.ancestral.mine(cleaned.tree$phy, anc.ml, 1,cex.pie = .5)
 ```
 
-How does this differ from parsimony? 
+**How does this differ from parsimony?**  
+It leaves less uncertainty at the deeper ancestral nodes.
 
-Why does it differ from parsimony?
+**Why does it differ from parsimony?**  
+Parsimony is only interested in minimizing the number of charcter state changes on the tree. Maximum likelihood uses transition rate parameters and branch lengths together to determine ancestral states.
 
-What does uncertainty mean?
+**What does uncertainty mean?**  
+In this case, uncertainty refers to the inability of our data to confidently reconstruct ancestral traits.
 
-Now, to the biological questions. For many of these, `corHMM` will be a useful package.
+**Now, to the biological questions. For many of these, `corHMM` will be a useful package.**
 
-1. How can you estimate transition rates between states? Do it.
-2. How could you examine if transition rates are equal?
-3. Think about the Lewis (2001) MKV model. Are your traits all variable? Will using this make sense for your data? Try using it. Do results change?
-4. How could you test order of state evolution?
+**1. How can you estimate transition rates between states? Do it.**
+```{r}
+data.for.corHMM <- cbind(row.names(cleaned.tree$data),cleaned.tree$data[,1:6])
+ped.corHMM <- corHMM(cleaned.tree$phy,data.for.corHMM[,1:2],rate.cat = 1,node.states = "marginal")
+ped.corHMM$solution
+```
+```{r echo=FALSE}
+paste0("The corHMM() model gives a maximum negative log-likelihood of ", round(ped.corHMM$loglik,digits = 3), " and an AIC value of ", round(ped.corHMM$AIC, digits = 3),".")
+```
+**2. How could you examine if transition rates are equal?**  
+Here, we are interested in knowing how the differences in transition rates calculated by corHMM() manifest themselves when mapping ancestral states onto a tree. The `p` argument for `corHMM()` allows us to specify a transition rate matrix, and it returns the likelihood of the tree given the supplied transition rate matrix. The rates could be set to the same values in the rate matrix and the likelihood could be compared to that under the corHMM() calculated rates.
+
+
+**3. Think about the Lewis (2001) MKV model. Are your traits all variable? Will using this make sense for your data? Try using it. Do results change?**  
+The Lewis MKV model is a conditional version of maximum likelihood. It assumes that the traits being evaluated for ancestral state reconstruction are drawn from the set of traits that are variable. For my data, this is a correct assumption -- I assigned the continuous trait data to discrete character states in a way that makes both discrete states approximately equally frequent.
+```{r}
+ped.lewismkv <- lewisMkv(cleaned.tree$phy,data.for.corHMM[,1:2])
+```
+```{r echo=FALSE}
+paste0("The Lewis MKV model gives a maximum negative log-likelihood of ", round(ped.lewismkv$loglik,digits = 3), " and an AIC value of ", round(ped.lewismkv$AIC, digits = 3),".")
+```
+The results include a larger AIC and a lower maximum negative log-likelihood, indicating that the uncorrected likelihood method used in `corHMM()` had overestimated the certainty of ancestral state reconstruction.
+
+**4. How could you test order of state evolution?**  
+We could fix the deepest ancestral state(s) at each value and determine the likelihoods of the resulting trees.
+

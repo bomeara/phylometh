@@ -15,7 +15,7 @@ set.seed(1859)
 First, install and load ape ([Paradis et al., 2004](https://doi.org/10.1093/bioinformatics/btg412)), TreeSim ([Stadler, 2011](http://dx.doi.org/10.1093/sysbio/syr029)), geiger ([Harmon et al., 2008](https://doi.org/10.1093/bioinformatics/btm538)), diversitree ([FitzJohn 2012](http://onlinelibrary.wiley.com/doi/10.1111/j.2041-210X.2012.00234.x/abstract)) and hisse ([Beaulieu & O'Meara, 2016](https://doi.org/10.1093/sysbio/syw022)). For the latter, it's probably best to load the cutting edge github version.
 
 ```{r, include=TRUE, echo=TRUE, message=FALSE, warning=FALSE}
-install.packages(c("ape", "TreeSim", "geiger", "diversitree", "devtools"))
+# install.packages(c("ape", "TreeSim", "geiger", "diversitree", "devtools"))
 library(ape)
 library(TreeSim)
 library(geiger)
@@ -33,7 +33,7 @@ my.tree <- TreeSim::sim.bd.taxa(n=300, numbsim=1, lambda=0.1, mu=0)[[1]]
 As always, plot it:
 
 ```{r}
-stop("How to plot a tree")
+plot(my.tree)
 ```
 
 One way to look at trees, and actually what many methods reduce to under the hood, is lineage through time plots. 
@@ -52,8 +52,7 @@ We can look at multiple trees:
 
 ```{r}
 yule.trees <- TreeSim::sim.bd.taxa(n=300, numbsim=10, lambda=0.1, mu=0, complete=FALSE)
-stop("How to do a multiple ltt plot?")
-
+mltt.plot(yule.trees, log = "y")
 ```
 
 We can also look at trees with birth and death.
@@ -102,8 +101,17 @@ So even though the the net diversification rate is the same, there are very diff
 **TODO** Try plotting some with other diversification parameters. What happens if speciation rate is much higher than extinction rate? How does the simulation change with different values, but keeping their difference constant? If their sum is constant? [remember to change to `eval=TRUE` to run]
 
 ```{r, eval=FALSE}
-my.trees <- TreeSim::sim.bd.taxa(n=300, numbsim=10, lambda=stop("CHOOSE YOUR VALUES"), mu=stop("CHOOSE YOUR VALUES"), complete=FALSE)
+my.trees <- TreeSim::sim.bd.taxa(n=300, numbsim=10, lambda=1, mu=.4, complete=FALSE)
+ape::mltt.plot(my.trees, log="y", legend=FALSE) # We can see that speciation starts much more recently -- shape is more like a yule process because mu is nearing zero
+my.trees <- TreeSim::sim.bd.taxa(n=300, numbsim=10, lambda=.8, mu=.2, complete=FALSE)
 ape::mltt.plot(my.trees, log="y", legend=FALSE)
+my.trees <- TreeSim::sim.bd.taxa(n=300, numbsim=10, lambda=.6, mu=0, complete=FALSE)
+ape::mltt.plot(my.trees, log="y", legend=FALSE) 
+# Not much changes as the values change and the difference is constant.
+my.trees <- TreeSim::sim.bd.taxa(n=300, numbsim=10, lambda=.6, mu=0, complete=FALSE)
+ape::mltt.plot(my.trees, log="y", legend=FALSE) 
+my.trees <- TreeSim::sim.bd.taxa(n=300, numbsim=10, lambda=.35, mu=.25, complete=FALSE)
+ape::mltt.plot(my.trees, log="y", legend=FALSE) # a lot can change, even when the sum is constant. Much longer time scales to get equal numbers of taxa when lambda and mu are close.
 ```
 
 Once you can see that there is some information in the distribution of branch lengths, you can (and people have) make multiple models and compare them: a model where diversification rate slows or speeds up over time generates different predictions from a model where it's constant, for example. There are a wide bestiary of models to compare: models that imply logistic growth to a maximum number of species ("Let's speciate due to the Rockies!" "Wait, we can't: there are too many species of us in China, we're full!"), species age ("I haven't speciated in a while -- I forget how"), mass extinctions ("Incoming rock!!!"), and more. It's important to remember the idea of [dull hypothesis testing](https://bookdown.org/bomeara/comparative-methods/dull-model-testing.html): if you're comparing a complex model versus a simple model, on a messy, real dataset, you're probably going to reject a simple model, even if the complex model isn't true. It's also worth looking at parameter estimates: if you find your group is undergoing logistic growth, what is the carrying capacity? If it's a group of 26 species, and the carrying capacity is 27, that's very different from finding a carrying capacity of 5000. The effect of missing species can also be significant (simulation to test for this effect can be important). There are also methods, like Medusa ([Alfaro et al., 2009](http://www.pnas.org/content/106/32/13410.abstract)) and BAMM ([Rabosky, 2014[(http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0089543)) that attempt to infer where on a tree diversification rate shifts have happened, though I'd currently (March 2017) caution against their use as the basis for a study (but using them to complement results gotten another way could be informative).
@@ -125,10 +133,10 @@ phy <- tree.musse(pars, max.taxa=50, x0=1, include.extinct=FALSE)
 sim.dat.true <- data.frame(names(phy$tip.state), phy$tip.state)
 sim.dat <- sim.dat.true
 # Now to hide the "hidden" state
-sim.dat[sim.dat[,2]==3,2] = 1
-sim.dat[sim.dat[,2]==4,2] = 2
+sim.dat[sim.dat[,2]==3,2] <- 1
+sim.dat[sim.dat[,2]==4,2] <- 2 #Hidden states here are 3 and 4. 4 has higher speciation rate
 # and convert states 1,2 to 0,1
-sim.dat[,2] = sim.dat[,2] - 1
+sim.dat[,2] <- sim.dat[,2] - 1
 ```
 
 As always, look at what we have wrought:
