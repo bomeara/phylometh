@@ -89,19 +89,21 @@ Look at the Markdown Cheatsheet [PDF](https://www.rstudio.com/wp-content/uploads
 
 Take the following lines and do what they say.
 
-MAKE THIS LINE BOLD
+***MAKE THIS LINE BOLD***
 
-MAKE THE WORD ITALIC ITALICIZED
+MAKE THE WORD *ITALIC* ITALICIZED
 
 MAKE THE FOLLOWING R CODE CREATE A PLOT IN THIS DOCUMENT
 
+```{r}
 plot(density(rnorm(1000)))
+```
 
 ### R exercise
 
 Edit gettingstarted_exercise.R and this document so that this code all runs properly in this document. You will need to change `eval=FALSE` to `eval=TRUE` within the curly brackets:
 
-```{r eval=FALSE}
+```{r eval=TRUE}
 library(ape)
 library(ips)
 source("gettingstarted_exercise.R")
