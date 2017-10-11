@@ -1,0 +1,30 @@
+---
+title: "PhyloMeth 2017"
+author: "Brian O'Meara"
+date: "10/11/2017"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+pubs <- read.csv("phylogen.csv", header=TRUE)
+colnames(pubs) <- gsub("\\.", "&", colnames(pubs))
+```
+
+
+```{r lines, echo=FALSE}
+pubs <- subset(pubs, Year>2005)
+plot(pubs$Year, pubs$Evolution, type="l", col="blue", bty="n", xlab="Year", ylim=c(min(pubs[,-1]), max(pubs[,-1])))
+lines(pubs$Year, pubs$Ecology, col="black")
+lines(pubs$Year, pubs$Phylogen., col="red")
+
+library(venneuler)
+last.year <- as.numeric(pubs[nrow(pubs),-1])
+names(last.year) <- colnames(pubs)[-1]
+plot(venneuler(last.year))
+
+
+devtools::install_github("mattflor/chorddiag")
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
