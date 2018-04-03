@@ -16,12 +16,20 @@ library("phangorn")
 
 Now get the tree and data. For these exercises, knowing uncertainty in your measurements can also be important. (remember for homework to change `eval=FALSE` to `eval=TRUE`).
 
-```{r, eval=FALSE}
+```{r eval=TRUE}
 
 setwd("D:/EEB 603/Code/Run 1")
-source("ContinuousFunctions.R")
-source("Macaque Project Functions.R")
+source('D:/EEB 603/Code/Run 1/ContinuousFunctions.R')
 source("Macaque Project Data Prep.R")
+
+
+# Read in tree
+
+tree.nex = read.nexus("D:/EEB 603/Trees/consensusTree_10kTrees_Primates_Version3.nex")
+phy <- multi2di(tree.nex, random=FALSE)
+treefile1 = phy
+
+##  Pull in morphometric/behavior data to be compiled
 
 discrete.data.raw <- read.csv("D://EEB 603/KUPRI Data/KUPRI_MAST_WITH_DISC.csv", stringsAsFactors = FALSE)
 discrete.data.prep <- as.matrix(discrete.data.raw[,6])
@@ -30,12 +38,6 @@ discrete.factors <- factor(discrete.data.prep)
 num.vec.disc <- as.matrix(as.numeric(discrete.factors))
 num.vec.disc <-`rownames<-`(num.vec.disc, c("Pan_troglodytes_troglodytes", "Gorilla_gorilla_gorilla", "Hylobates_lar", "Macaca_sylvanus","Macaca_thibetana", "Macaca_mulatta", "Macaca_fascicularis", "Macaca_fuscata", "Macaca_cyclopis", "Macaca_nemestrina", "Macaca_silenus", "Macaca_pagensis", "Macaca_nigra", "Macaca_maura", "Macaca_sinica", "Macaca_radiata", "Macaca_assamensis", "Macaca_arctoides","Papio_hamadryas", "Theropithecus_gelada", "Mandrillus_sphinx", "Cercocebus_torquatus", "Cercocebus_galeritus","Erythrocebus_patas","Cercopithecus_neglectus","Cercopithecus_campbelli","Cercopithecus_petaurista"))
 
-
-# Read in tree
-
-tree.nex = read.nexus("D:/EEB 603/Trees/consensusTree_10kTrees_Primates_Version3.nex")
-phy <- multi2di(tree.nex, random=FALSE)
-treefile1 = phy
 
 ## Force trees to be ultrametric
 
@@ -56,13 +58,16 @@ treefile1 = phy
     tree
   }
 
-  # discrete 
+ 
+ # discrete 
 
   pruned.phy <-name.check(treefile1, num.vec.disc)
   phy.discrete <- drop.tip(treefile1, pruned.phy$tree_not_data)
   branch.time <- branching.times(phy.discrete)
   ult.phy.disc <- force.ultrametric(phy.discrete)
-
+ 
+  is.ultrametric(ult.phy.disc)
+  
   # continous
   
   continuous.data <- log(phenotype.z.complete[,1])
@@ -70,7 +75,10 @@ treefile1 = phy
   phy.cont <- drop.tip(treefile1, pruned.phy.cont$tree_not_data)
   branch.time.cont <- branching.times(phy.cont)
   ult.phy.cont <- force.ultrametric(phy.cont)
+  
   is.ultrametric(ult.phy.cont)
+
+
 ```
 
 A function to clean data, make sure taxon names match between tree and data, etc. 
@@ -92,6 +100,12 @@ CleanData <- function(tree.phy, data.phy, col.no) {
 
 ```{r, eval=TRUE}
 
+  pruned.phy.cont <- name.check(treefile1, continuous.data)
+  phy.cont <- drop.tip(treefile1, pruned.phy.cont$tree_not_data)
+  branch.time.cont <- branching.times(phy.cont)
+  ult.phy.cont <- force.ultrametric(phy.cont)
+ 
+
 Plot.phy <- function(tree.phy, main.char){
   
   plot.phy <- plot(tree.phy, main = main.char, show.tip.label = FALSE)
@@ -100,6 +114,17 @@ Plot.phy <- function(tree.phy, main.char){
   
 }
 
+VisualizeData <- function(phytree, dat.mat, main.char){
+
+    ## make a phenogram
+
+    phytools::phenogram(phytree, dat.mat, main = main.char, cex = .85, edge.width = .5, spread.labels = TRUE, fsize = .45)
+
+
+  ##  Plot density
+    plot(density(dat.mat), main = main.char)
+    
+}
 
 ## Clean the data 
   
@@ -126,7 +151,7 @@ print(paste("The rate of evolution is", "0.006838", "in units of", "sigma^2/time
 Important: What are the rates of evolution? In what units?
 
 
-```{r, eval=FALSE}
+```{r, eval=TRUE}
 OU1 <- fitContinuous(ult.phy.cont, cleaned.continuous, model="OU")
 par(mfcol=(c(1,2)))
 mod.alpha = OU1$opt$alpha
@@ -139,12 +164,14 @@ How are the trees different?
 
 Compare trees
 
-```{r, eval=FALSE}
+```{r, eval=TRUE}
 AIC.BM1 <- BM1$opt$aic
 AIC.OU1 <- OU1$opt$aic
 min.AIC = min(AIC.BM1, AIC.OU1)
 delta.AIC.BM1 <- BM1$opt$aic - min.AIC
 delta.AIC.OU1 <- OU1$opt$aic - min.AIC
+print(c("Delta AIC BM1:", delta.AIC.BM1))
+print(c("Delta AIC OU1:", delta.AIC.OU1))
 ```
 
 
@@ -156,18 +183,49 @@ We're a bit obsessive about doing multiple starts and in general performing a th
 
 First, we need to assign regimes. The way we do this is with ancestral state estimation of a discrete trait. We can do this using ace() in ape, or similar functions in corHMM or diversitree. Use only one discrete char.
 
-```{r, eval=FALSE}
-one.discrete.char <- _____________
-reconstruction.info <- ace(one.discrete.char, tree, type="discrete", method="ML", CI=TRUE)
-best.states <- colnames(reconstruction.info$lik.anc)[apply(reconstruction.info$lik.anc, 1, which.max)]
+```{r, eval=TRUE}
+
+## get discrete species into df
+disc.species <- rownames(num.vec.disc)
+disc.traits.conv <- as.matrix(cleaned.discrete)
+disc.traits <- `row.names<-.default`(disc.traits.conv, value = NULL)
+disc.df <- as.data.frame(disc.traits, row.names = disc.species, stringsAsFactors = FALSE)
+disc.phylo <- as.data.frame(disc.traits.conv[match(ult.phy.disc$tip.label,rownames(disc.traits.conv)),])
+disc.phylo.vector <- disc.phylo[,1]
+names(disc.phylo.vector) <- rownames(disc.phylo)
+
+ult.phy.disc.tinybrlen <- ult.phy.disc
+ult.phy.disc.tinybrlen$edge.length[which(ult.phy.disc.tinybrlen$edge.length==0)] <- 1e-08
+
+reconstruction.info <- ape::ace(disc.phylo.vector,ult.phy.disc.tinybrlen, type="discrete", method="ML", CI=FALSE, model = "ER")
+
+# best.states <- colnames(reconstruction.info)[apply(reconstruction.info$call, 1, which.max)]
+
 ```
 
 Now add these labels to your tree.
 
 ```{r, eval=FALSE}
-labeled.tree <- ________________
-nodeBased.OUMV <- OUwie(tree, cleaned.continuous,model="OUMV", simmap.tree=FALSE, diagn=FALSE)
+
+##  Get continuous data into df
+cont.species <- rownames(as.matrix(continuous.data))
+cont.traits.conv <- as.matrix(cleaned.continuous)
+cont.traits <- `row.names<-.default`(cont.traits.conv, value = NULL)
+cont.df <- as.data.frame(cont.traits, row.names = cont.species, stringsAsFactors = FALSE)
+cont.phylo <- as.data.frame(cont.traits.conv[match(ult.phy.cont$tip.label,rownames(cont.traits.conv)),])
+
+
+# labeled.tree <- ________________
+
+ult.phy.cont.tinybrlen <- ult.phy.cont
+ult.phy.cont.tinybrlen$edge.length[which(ult.phy.cont.tinybrlen$edge.length==0)] <- 1e-08
+
+nodeBased.OUMV <- OUwie(ult.phy.cont.tinybrlen, cont.phylo, model="OUMV", simmap.tree=FALSE, diagn=FALSE)
 print(nodeBased.OUMV)
+
+##Error in `[.data.frame`(data, , 3) : undefined columns selected
+
+
 ```
 
 What do the numbers mean?
@@ -176,7 +234,7 @@ Now run all OUwie models:
 
 ```{r, eval=FALSE}
 models <- c("BM1","BMS","OU1","OUM","OUMV","OUMA","OUMVA")
-results <- lapply(models, RunSingleOUwieModel, phy=tree, data=trait)
+results <- lapply(models, RunSingleOUwieModel, phy=ult.phy.cont.tinybrlen, data=cont.phylo)
 
 AICc.values<-sapply(results, "[[", "AICc")
 names(AICc.values)<-models
