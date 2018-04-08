@@ -1,0 +1,166 @@
+---
+title: "DiscreteCharacters"
+author: "Brian O'Meara"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output:
+  html_document:
+    df_print: paged
+  pdf_document: default
+---
+
+For this exercise, explore looking at discrete character models. Note: they are not "discreet" character models -- they're actually pretty noisy.
+
+These are useful packages in this area (far from exhaustive list -- see the [CRAN task view](https://cran.r-project.org/web/views/Phylogenetics.html) for more). Rather than have to worry about do you have dependencies installed, etc. this will use the yearn package to load a package if you have it, or install and load it if you don't. In real life, you should have all the packages you need already installed and call with a `library()` call; best practices are evolving to use things like [https://rstudio.github.io/packrat/](packrat) to keep consistent package versions throughout an analysis.
+
+
+
+```{r, eval=TRUE}
+chooseCRANmirror(graphics=FALSE, ind=1)
+install.packages("yearn")
+yearn::yearn(ape)
+yearn::yearn(geiger)
+yearn::yearn(phytools)
+yearn::yearn(phangorn)
+yearn::yearn(corHMM)
+```
+
+You'll need to get data into R in some way. Look at other phylometh assignments for how to get trees and data.
+
+```{r, eval=TRUE}
+library(ape)
+ttree<-read.tree(file="~/Downloads/newer.tre")
+
+ttree$tip.label
+bad.taxa <- ttree$tip.label[grepl("COI", ttree$tip.label)]
+better.tree <- drop.tip(ttree, bad.taxa)
+
+library(taxize)
+
+GetGenus <- function(x) {
+  split.result <- strsplit(gsub("_", " ", x), " ")[[1]][1]
+  return(split.result)
+}
+
+unresolved.tree <- better.tree
+for (i in sequence(Ntip(better.tree))) {
+  unresolved.tree$tip.label[i] <- GetGenus(unresolved.tree$tip.label[i])
+}
+
+DeleteDuplicateTips <- function(x) {
+  dups <- c()
+  originals <- c()
+  for (i in sequence(Ntip(x))) {
+    this.name <- x$tip.label[i]
+    if(this.name %in% originals) {
+      dups <- c(dups, i)
+    } else {
+      originals <- c(originals, this.name)
+    }
+  }
+  if(length(dups)>0) {
+    x <- drop.tip(x, dups)
+  }
+  return(x)
+}
+
+pruned.tree <- DeleteDuplicateTips(unresolved.tree)
+library(ape)
+plot.phylo(pruned.tree)
+
+```
+
+```{r, eval=TRUE}
+
+OT<-read.csv("~/Documents/OTdiscrete.csv") 
+```
+
+Data are often not right in some way. They might not match the taxa in your tree, there may be missing data, etc. `geiger::treedata` is a great function for getting a tree and data that match, but your data may need other cleaning. Do it as a function so it's repeatable.
+
+```{r, eval=TRUE}
+OT.vector<-OT[,2]
+names(OT.vector)<-OT[,1]
+
+library(geiger)
+CleanData <- function(pruned.tree,OT.vector) {
+  treedata(pruned.tree,OT.vector)
+}
+ 
+
+```
+
+It's critically important to LOOK at what you have. Are there weird values? Has the match between taxa and state gone correctly? Do you think you have binary data, but there's actually only state 1? Especially as data sets grow (yay), and are assembled using scripts rather than by error-prone, non-reproducable hands (double yay), scientists are increasingly less likely to deeply look at our data. That's bad -- don't be that person.
+
+```{r, eval=TRUE}
+VisualizeData <- function(phy, data) {
+	#Important here is to LOOK at your data before running it. Any weird values? Does it all make sense? What about your tree? Polytomies?
+
+    # Now write the code to use VisualizeData() to actually look at your data
+
+}
+```
+
+First, let's use parsimony to look at ancestral states:
+
+```{r, eval=TRUE}
+library(phangorn)
+
+OT.matrix<-as.matrix(OT.vector,ncol=1)
+Clean.OT<-as.phyDat(OT.matrix,type="USER",levels=c(0,1))
+
+anc.p <- ancestral.pars(pruned.tree, Clean.OT)
+anc.p
+plotAnc(tree = pruned.tree,data = anc.p)
+
+
+```
+
+Do you see uncertainty? What does it mean?
+
+Now, plot the likelihood estimates.
+
+```{r, eval=TRUE}
+anc.ml <- ancestral.pml(pml(pruned.tree, Clean.OT), type="ml")
+plotAnc(pruned.tree, anc.ml, 1)
+```
+
+How does this differ from parsimony?
+The maximum likelihood estimate differs from parsimony on the estimates of the ancestral character states in that it is more precise in estimating the ancestral character states.  This is 'likely' because maximum likelihood takes into account other parameters such as branch length, that parsimony does not.  For the parsimony analysis, all the values of the ancestral characters (Ocellar tubercle presence/absence) are equally likely to be present or absent because both trees have an equal number of ancestral state changes.  
+
+Why does it differ from parsimony?
+The reason this differes from parsimony is because parsimony simply returns the simplest possible explanation of the data by minimizing the number of character state changes along branches to explain the character states possesed by the ingroup taxa.  Maximum likelihood looks at all possibilities given the category of the parameter being estimated and gives a probability of each ancestral state occuring based on likelihood of character changes over the given branch length time.  
+
+What does uncertainty mean?
+Uncertainty is the error or unexplained variation assosciated with each ancestral node estimation.  
+
+Now, to the biological questions. For many of these, `corHMM` will be a useful package. Do the following analyses:
+
+1. How can you estimate transition rates between states? Do it.
+
+```{r, eval=TRUE}
+library(corHMM)
+
+
+devtools::install_github("thej022214/corHMM", dependencies = FALSE)
+
+OT.Transition.rates<-corHMM(pruned.tree,OT,rate.cat=2,node.states="none")
+
+```
+2. How could you examine if transition rates are equal?
+```{r, eval=TRUE}
+print(OT.Transition.rates)
+```
+
+#
+
+3. Think about the Lewis (2001) MKV model. Are your traits all variable? Will using this make sense for your data? Try using it. Do results change?
+```{r, eval=TRUE}
+MKV.mod<-lewisMkv(pruned.tree,data = OT.matrix)
+```
+
+4. How could you test order of state evolution?
+
+```{r, eval=TRUE}
+OTpresence<-corHMM(pruned.tree,OT.matrix,rate.cat=2,node.states="none",root.p=1)
+OTabsence<-corHMM(pruned.tree,OT.matrix,rate.cat=2,node.states="none",root.p=0)
+       
+```
