@@ -12,6 +12,8 @@ library(ape) #utility fns
 library(geiger) #utilty fns
 library(OUwie)
 library("phangorn")
+library("corHMM")
+library("phytools")
 ```
 
 Now get the tree and data. For these exercises, knowing uncertainty in your measurements can also be important. (remember for homework to change `eval=FALSE` to `eval=TRUE`).
@@ -70,7 +72,7 @@ num.vec.disc <-`rownames<-`(num.vec.disc, c("Pan_troglodytes_troglodytes", "Gori
   
   # continous
   
-  continuous.data <- log(phenotype.z.complete[,1])
+  continuous.data <- as.matrix(log(phenotype.z.complete[,1]))
   pruned.phy.cont <- name.check(treefile1, continuous.data)
   phy.cont <- drop.tip(treefile1, pruned.phy.cont$tree_not_data)
   branch.time.cont <- branching.times(phy.cont)
@@ -87,11 +89,17 @@ A function to clean data, make sure taxon names match between tree and data, etc
 CleanData <- function(tree.phy, data.phy, col.no) {
   
   phy <- ape::reorder.phylo(tree.phy)
-  data1 <- geiger::treedata(phy, data.phy, sort=TRUE)$data
+  data1 <- geiger::treedata(tree.phy, data.phy, sort=TRUE)$data
+
+  data1 <- as.matrix(data.phy[match(tree.phy$tip.label, rownames(data.phy)),])
+  
+  # data1 <- `rownames<-`(data.phy)
+  
+  # data_out <- as.data.frame.vector(data1, row.names = row.names(data.phy))
   
     ##  Since we're doing univar for now, I'm asking for the vector of pheno vals I need
   
-   return(data1[,col.no])
+   return(data1)
   
 }
 ```
@@ -130,8 +138,8 @@ VisualizeData <- function(phytree, dat.mat, main.char){
   
 cleaned.continuous <- CleanData(ult.phy.cont, continuous.data, 1)
 cleaned.discrete <- CleanData.discrete(ult.phy.disc, num.vec.disc, 1)
-VisualizeData(ult.phy.cont, cleaned.continuous, "Continuous_IOB")
-VisualizeData(ult.phy.disc, cleaned.discrete, "FORAGE_POOLED")
+VisualizeData(ult.phy.cont, as.vector(cleaned.continuous[,1]), "Continuous_IOB")
+VisualizeData(ult.phy.disc, as.vector(cleaned.discrete[,1]), "FORAGE_POOLED")
 
 ```
 
@@ -145,7 +153,7 @@ First, start basic. What is the rate of evolution of your trait on the tree?
 #First, start basic. What is the rate of evolution of your trait on the tree? 
 
 BM1 <- fitContinuous(ult.phy.cont, cleaned.continuous, model="BM")
-print(paste("The rate of evolution is", "0.006838", "in units of", "sigma^2/time"))
+print(paste("The rate of evolution is", "0.006838", "in units of", "log(interorbital breadth)/time"))
 ```
 
 Important: What are the rates of evolution? In what units?
@@ -189,17 +197,23 @@ First, we need to assign regimes. The way we do this is with ancestral state est
 disc.species <- rownames(num.vec.disc)
 disc.traits.conv <- as.matrix(cleaned.discrete)
 disc.traits <- `row.names<-.default`(disc.traits.conv, value = NULL)
-disc.df <- as.data.frame(disc.traits, row.names = disc.species, stringsAsFactors = FALSE)
-disc.phylo <- as.data.frame(disc.traits.conv[match(ult.phy.disc$tip.label,rownames(disc.traits.conv)),])
-disc.phylo.vector <- disc.phylo[,1]
-names(disc.phylo.vector) <- rownames(disc.phylo)
+regime.d.v <- as.vector(c(1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,3,3,3,4,4,4,4,4,4))
+
+disc.df <-data.frame(Genus_species = row.names(disc.traits.conv), Reg = as.numeric(regime.v), x = as.numeric(disc.traits[,1]))
+View(disc.df)
+
+
+# disc.df <- as.data.frame(disc.traits, row.names = disc.species, stringsAsFactors = FALSE)
+# disc.phylo <- as.data.frame(disc.traits.conv[match(ult.phy.disc$tip.label,rownames(disc.traits.conv)),])
+# disc.phylo.vector <- disc.phylo[,1]
+# names(disc.phylo.vector) <- rownames(disc.phylo)
 
 ult.phy.disc.tinybrlen <- ult.phy.disc
 ult.phy.disc.tinybrlen$edge.length[which(ult.phy.disc.tinybrlen$edge.length==0)] <- 1e-08
 
-reconstruction.info <- ape::ace(disc.phylo.vector,ult.phy.disc.tinybrlen, type="discrete", method="ML", CI=FALSE, model = "ER")
+reconstruction.info <- ape::ace(disc.df$x, ult.phy.disc.tinybrlen, type="discrete", method="ML", CI=FALSE, model = "ER")
 
-# best.states <- colnames(reconstruction.info)[apply(reconstruction.info$call, 1, which.max)]
+# best.states <- colnames(reconstruction.info)[apply(reconstruction.info$loglik.anc, 1, which.max)]
 
 ```
 
@@ -211,16 +225,27 @@ Now add these labels to your tree.
 cont.species <- rownames(as.matrix(continuous.data))
 cont.traits.conv <- as.matrix(cleaned.continuous)
 cont.traits <- `row.names<-.default`(cont.traits.conv, value = NULL)
-cont.df <- as.data.frame(cont.traits, row.names = cont.species, stringsAsFactors = FALSE)
-cont.phylo <- as.data.frame(cont.traits.conv[match(ult.phy.cont$tip.label,rownames(cont.traits.conv)),])
+regime.v <- as.vector(c(1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,3,3,3,4,4,4,4,4,4))
+# cont.m <- as.matrix(cbind(cont.species, regime.v, as.numeric(cont.traits))
+# cont.df <- as.data.frame(cont.m, stringsAsFactors = FALSE )
+# colnames(cont.df) <- c("Genus_species", "Reg", "trait")
 
-
-# labeled.tree <- ________________
+cont.df <-data.frame(Genus_species = row.names(cont.traits.conv), Reg = as.numeric(regime.v), x = as.numeric(cont.traits[,1]))
+View(cont.df)
 
 ult.phy.cont.tinybrlen <- ult.phy.cont
 ult.phy.cont.tinybrlen$edge.length[which(ult.phy.cont.tinybrlen$edge.length==0)] <- 1e-08
 
-nodeBased.OUMV <- OUwie(ult.phy.cont.tinybrlen, cont.phylo, model="OUMV", simmap.tree=FALSE, diagn=FALSE)
+tree.cont<-phytools::make.simmap(ult.phy.cont.tinybrlen, cont.df$x)
+
+recontstruction.info.cont <- ape::ace(cont.df$x, ult.phy.cont, type = "continuous", method = "REML", CI = FALSE, model = "BM")
+
+
+# labeled.tree <- ________________
+
+
+
+nodeBased.OUMV <- OUwie(ult.phy.cont.tinybrlen, cont.df, model="OUMV", simmap.tree=FALSE, diagn=FALSE)
 print(nodeBased.OUMV)
 
 ##Error in `[.data.frame`(data, , 3) : undefined columns selected
