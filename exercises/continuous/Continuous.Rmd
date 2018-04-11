@@ -2,7 +2,9 @@
 title: "Continuous character models"
 author: "Brian C. O'Meara"
 date: "2/20/2017"
-output: html_document
+output:
+  html_document: default
+  pdf_document: default
 ---
 
 First get packages we need
