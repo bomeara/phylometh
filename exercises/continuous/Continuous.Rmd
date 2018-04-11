@@ -246,6 +246,9 @@ newvals <- as.vector(c(cont.traits[,1], 0, recontstruction.info.cont$ace))
 VisualizeData(ult.phy.cont, newvals, "Continuous_IOB")
 plot(density(newvals))
 
+ult.phy.cont$Nnode
+
+
 nodeBased.OUMV <- OUwie(ult.phy.cont.tinybrlen, cont.df, model="OUMV", simmap.tree=FALSE, diagn=FALSE)
 print(nodeBased.OUMV)
 
