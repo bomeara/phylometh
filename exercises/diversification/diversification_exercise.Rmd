@@ -20,7 +20,7 @@ library(ape)
 library(TreeSim)
 library(geiger)
 library(diversitree)
-devtools::install_github("thej022214/hisse")
+# devtools::install_github("thej022214/hisse")
 library(hisse)
 ```
 
@@ -33,7 +33,23 @@ my.tree <- TreeSim::sim.bd.taxa(n=300, numbsim=1, lambda=0.1, mu=0)[[1]]
 As always, plot it:
 
 ```{r}
-stop("How to plot a tree")
+VisualizeData <- function(phytree, dat.mat, main.char){
+
+  ##  show the generic tree
+  plot(phytree, main = main.char, show.tip.label = TRUE)
+  
+  ## make a phenogram
+
+    phytools::phenogram(phytree, dat.mat, main = main.char, cex = .85, edge.width = .5, spread.labels = TRUE, fsize = .45)
+
+
+  ##  Plot density
+    plot(density(dat.mat), main = main.char)
+    
+}
+
+
+plot(my.tree)
 ```
 
 One way to look at trees, and actually what many methods reduce to under the hood, is lineage through time plots. 
@@ -52,7 +68,7 @@ We can look at multiple trees:
 
 ```{r}
 yule.trees <- TreeSim::sim.bd.taxa(n=300, numbsim=10, lambda=0.1, mu=0, complete=FALSE)
-stop("How to do a multiple ltt plot?")
+ape::mltt.plot(yule.trees)
 
 ```
 
