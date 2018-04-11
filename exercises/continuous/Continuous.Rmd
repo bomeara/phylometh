@@ -12,16 +12,26 @@ library(ape) #utility fns
 library(geiger) #utilty fns
 library(OUwie)
 library("phangorn")
+library("corHMM")
+library("phytools")
 ```
 
 Now get the tree and data. For these exercises, knowing uncertainty in your measurements can also be important. (remember for homework to change `eval=FALSE` to `eval=TRUE`).
 
-```{r, eval=FALSE}
+```{r eval=TRUE}
 
 setwd("D:/EEB 603/Code/Run 1")
-source("ContinuousFunctions.R")
-source("Macaque Project Functions.R")
+source('D:/EEB 603/Code/Run 1/ContinuousFunctions.R')
 source("Macaque Project Data Prep.R")
+
+
+# Read in tree
+
+tree.nex = read.nexus("D:/EEB 603/Trees/consensusTree_10kTrees_Primates_Version3.nex")
+phy <- multi2di(tree.nex, random=FALSE)
+treefile1 = phy
+
+##  Pull in morphometric/behavior data to be compiled
 
 discrete.data.raw <- read.csv("D://EEB 603/KUPRI Data/KUPRI_MAST_WITH_DISC.csv", stringsAsFactors = FALSE)
 discrete.data.prep <- as.matrix(discrete.data.raw[,6])
@@ -30,12 +40,6 @@ discrete.factors <- factor(discrete.data.prep)
 num.vec.disc <- as.matrix(as.numeric(discrete.factors))
 num.vec.disc <-`rownames<-`(num.vec.disc, c("Pan_troglodytes_troglodytes", "Gorilla_gorilla_gorilla", "Hylobates_lar", "Macaca_sylvanus","Macaca_thibetana", "Macaca_mulatta", "Macaca_fascicularis", "Macaca_fuscata", "Macaca_cyclopis", "Macaca_nemestrina", "Macaca_silenus", "Macaca_pagensis", "Macaca_nigra", "Macaca_maura", "Macaca_sinica", "Macaca_radiata", "Macaca_assamensis", "Macaca_arctoides","Papio_hamadryas", "Theropithecus_gelada", "Mandrillus_sphinx", "Cercocebus_torquatus", "Cercocebus_galeritus","Erythrocebus_patas","Cercopithecus_neglectus","Cercopithecus_campbelli","Cercopithecus_petaurista"))
 
-
-# Read in tree
-
-tree.nex = read.nexus("D:/EEB 603/Trees/consensusTree_10kTrees_Primates_Version3.nex")
-phy <- multi2di(tree.nex, random=FALSE)
-treefile1 = phy
 
 ## Force trees to be ultrametric
 
@@ -56,21 +60,27 @@ treefile1 = phy
     tree
   }
 
-  # discrete 
+ 
+ # discrete 
 
   pruned.phy <-name.check(treefile1, num.vec.disc)
   phy.discrete <- drop.tip(treefile1, pruned.phy$tree_not_data)
-  branch.time <- branching.times(phy.discrete)
+  branch.time.discrete <- branching.times(phy.discrete)
   ult.phy.disc <- force.ultrametric(phy.discrete)
-
+ 
+  is.ultrametric(ult.phy.disc)
+  
   # continous
   
-  continuous.data <- log(phenotype.z.complete[,1])
+  continuous.data <- as.matrix(log(phenotype.z.complete[,1]))
   pruned.phy.cont <- name.check(treefile1, continuous.data)
   phy.cont <- drop.tip(treefile1, pruned.phy.cont$tree_not_data)
   branch.time.cont <- branching.times(phy.cont)
   ult.phy.cont <- force.ultrametric(phy.cont)
+  
   is.ultrametric(ult.phy.cont)
+
+
 ```
 
 A function to clean data, make sure taxon names match between tree and data, etc. 
@@ -79,11 +89,17 @@ A function to clean data, make sure taxon names match between tree and data, etc
 CleanData <- function(tree.phy, data.phy, col.no) {
   
   phy <- ape::reorder.phylo(tree.phy)
-  data1 <- geiger::treedata(phy, data.phy, sort=TRUE)$data
+  data1 <- geiger::treedata(tree.phy, data.phy, sort=TRUE)$data
+
+  data1 <- as.matrix(data.phy[match(tree.phy$tip.label, rownames(data.phy)),])
+  
+  # data1 <- `rownames<-`(data.phy)
+  
+  # data_out <- as.data.frame.vector(data1, row.names = row.names(data.phy))
   
     ##  Since we're doing univar for now, I'm asking for the vector of pheno vals I need
   
-   return(data1[,col.no])
+   return(data1)
   
 }
 ```
@@ -92,21 +108,43 @@ CleanData <- function(tree.phy, data.phy, col.no) {
 
 ```{r, eval=TRUE}
 
+  pruned.phy.cont <- name.check(treefile1, continuous.data)
+  phy.cont <- drop.tip(treefile1, pruned.phy.cont$tree_not_data)
+  branch.time.cont <- branching.times(phy.cont)
+  ult.phy.cont <- force.ultrametric(phy.cont)
+  
 Plot.phy <- function(tree.phy, main.char){
-  
-  plot.phy <- plot(tree.phy, main = main.char, show.tip.label = FALSE)
-  
-  return(plot.phy)
-  
-}
+   
+   plot.phy <- plot(tree.phy, main = main.char, show.tip.label = FALSE)
+   
+   return(plot.phy)
+   
+ }
+ 
 
+VisualizeData <- function(phytree, dat.mat, main.char){
+
+  ##  show the generic tree
+  plot(phytree, main = main.char, show.tip.label = TRUE)
+  
+  ## make a phenogram
+
+    phytools::phenogram(phytree, dat.mat, main = main.char, cex = .85, edge.width = .5, spread.labels = TRUE, fsize = .45)
+
+
+  ##  Plot density
+    plot(density(dat.mat), main = main.char)
+    
+}
 
 ## Clean the data 
   
-cleaned.continuous <- CleanData(ult.phy.cont, continuous.data, 1)
-cleaned.discrete <- CleanData.discrete(ult.phy.disc, num.vec.disc, 1)
-VisualizeData(ult.phy.cont, cleaned.continuous, "Continuous_IOB")
-VisualizeData(ult.phy.disc, cleaned.discrete, "FORAGE_POOLED")
+cleaned.continuous <- as.matrix(CleanData(ult.phy.cont, continuous.data, 1))
+cleaned.discrete <- as.matrix(CleanData.discrete(ult.phy.disc, num.vec.disc, 1))
+print(cleaned.continuous)
+print(cleaned.discrete)
+VisualizeData(ult.phy.cont, cleaned.continuous[,1], "Continuous_IOB")
+VisualizeData(ult.phy.disc, cleaned.discrete[,1], "FORAGE_POOLED")
 
 ```
 
@@ -120,18 +158,22 @@ First, start basic. What is the rate of evolution of your trait on the tree?
 #First, start basic. What is the rate of evolution of your trait on the tree? 
 
 BM1 <- fitContinuous(ult.phy.cont, cleaned.continuous, model="BM")
-print(paste("The rate of evolution is", "0.006838", "in units of", "sigma^2/time"))
+print(paste("The rate of evolution is", "0.006838", "in units of", "log(interorbital breadth)^2/time"))
 ```
 
 Important: What are the rates of evolution? In what units?
 
 
-```{r, eval=FALSE}
-OU1 <- fitContinuous(ult.phy.cont, cleaned.continuous, model="OU")
+```{r, eval=TRUE}
+
+ult.phy.cont.tinybrlen <- ult.phy.cont
+ult.phy.cont.tinybrlen$edge.length[which(ult.phy.cont.tinybrlen$edge.length==0)] <- 1e-08
+
+OU1 <- fitContinuous(ult.phy.cont.tinybrlen, cleaned.continuous, model="OU")
 par(mfcol=(c(1,2)))
 mod.alpha = OU1$opt$alpha
-Plot.phy(ult.phy.cont, "IOB_ALL")
-ou.tree <- geiger::rescale(ult.phy.cont, model="OU", alpha = mod.alpha)
+Plot.phy(ult.phy.cont.tinybrlen, "IOB_ALL")
+ou.tree <- geiger::rescale(ult.phy.cont.tinybrlen, model="OU", alpha = mod.alpha)
 Plot.phy(ou.tree, "IOB_ALL_RESCALE")
 ```
 
@@ -139,12 +181,14 @@ How are the trees different?
 
 Compare trees
 
-```{r, eval=FALSE}
+```{r, eval=TRUE}
 AIC.BM1 <- BM1$opt$aic
 AIC.OU1 <- OU1$opt$aic
 min.AIC = min(AIC.BM1, AIC.OU1)
 delta.AIC.BM1 <- BM1$opt$aic - min.AIC
 delta.AIC.OU1 <- OU1$opt$aic - min.AIC
+print(c("Delta AIC BM1:", delta.AIC.BM1))
+print(c("Delta AIC OU1:", delta.AIC.OU1))
 ```
 
 
@@ -156,27 +200,74 @@ We're a bit obsessive about doing multiple starts and in general performing a th
 
 First, we need to assign regimes. The way we do this is with ancestral state estimation of a discrete trait. We can do this using ace() in ape, or similar functions in corHMM or diversitree. Use only one discrete char.
 
-```{r, eval=FALSE}
-one.discrete.char <- _____________
-reconstruction.info <- ace(one.discrete.char, tree, type="discrete", method="ML", CI=TRUE)
+```{r, eval=TRUE}
+
+## get discrete species into df
+disc.species <- rownames(cleaned.continuous)
+disc.traits.conv <- as.matrix(cleaned.discrete)
+disc.traits <- `row.names<-.default`(disc.traits.conv, value = NULL)
+regime.v <- as.vector(c(1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,3,3,3,4,4,4,4,4,4))
+
+disc.df <-data.frame(Genus_species = row.names(cleaned.continuous), Reg = as.numeric(regime.v), x = as.numeric(disc.traits[,1]))
+View(disc.df)
+
+
+# disc.df <- as.data.frame(disc.traits, row.names = disc.species, stringsAsFactors = FALSE)
+# disc.phylo <- as.data.frame(disc.traits.conv[match(ult.phy.disc$tip.label,rownames(disc.traits.conv)),])
+# disc.phylo.vector <- disc.phylo[,1]
+# names(disc.phylo.vector) <- rownames(disc.phylo)
+
+ult.phy.disc.tinybrlen <- ult.phy.disc
+ult.phy.disc.tinybrlen$edge.length[which(ult.phy.disc.tinybrlen$edge.length==0)] <- 1e-08
+
+reconstruction.info <- ape::ace(disc.df$x, ult.phy.disc.tinybrlen, type="d", method="ML", CI=TRUE, model = "ER", use.eigen = TRUE)
+
 best.states <- colnames(reconstruction.info$lik.anc)[apply(reconstruction.info$lik.anc, 1, which.max)]
+
 ```
 
 Now add these labels to your tree.
 
-```{r, eval=FALSE}
-labeled.tree <- ________________
-nodeBased.OUMV <- OUwie(tree, cleaned.continuous,model="OUMV", simmap.tree=FALSE, diagn=FALSE)
+```{r, eval=TRUE}
+
+##  Get continuous data into df
+cont.species <- rownames(as.matrix(continuous.data))
+cont.traits.conv <- as.matrix(cleaned.continuous)
+cont.traits <- `row.names<-.default`(cont.traits.conv, value = NULL)
+regime.v <- as.vector(c(1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,3,3,3,4,4,4,4,4,4))
+# cont.m <- as.matrix(cbind(cont.species, regime.v, as.numeric(cont.traits))
+# cont.df <- as.data.frame(cont.m, stringsAsFactors = FALSE )
+# colnames(cont.df) <- c("Genus_species", "Reg", "trait")
+
+cont.df <-data.frame(Genus_species = row.names(cont.traits.conv), Reg = as.numeric(regime.v), x = as.numeric(cont.traits[,1]))
+View(cont.df)
+
+ult.phy.cont.tinybrlen <- ult.phy.cont
+ult.phy.cont.tinybrlen$edge.length[which(ult.phy.cont.tinybrlen$edge.length==0)] <- 1e-08
+
+# tree.cont<-phytools::make.simmap(ult.phy.cont.tinybrlen, cont.df$x)
+
+reconstruction.info.cont <- ape::ace(cont.df$x, ult.phy.cont.tinybrlen, type = "continuous", method = "REML", CI = FALSE, model = "BM")
+
+
+
+ult.phy.cont.tinybrlen$node.label <- best.states
+
+nodeBased.OUMV <- OUwie(ult.phy.cont.tinybrlen, cont.df, model="OUMV", simmap.tree=FALSE, diagn=FALSE)
 print(nodeBased.OUMV)
+
+##Error in `[.data.frame`(data, , 3) : undefined columns selected
+
+
 ```
 
 What do the numbers mean?
 
 Now run all OUwie models:
 
-```{r, eval=FALSE}
+```{r, eval=TRUE}
 models <- c("BM1","BMS","OU1","OUM","OUMV","OUMA","OUMVA")
-results <- lapply(models, RunSingleOUwieModel, phy=tree, data=trait)
+results <- lapply(models, RunSingleOUwieModel, phy=ult.phy.cont.tinybrlen, data=cont.df)
 
 AICc.values<-sapply(results, "[[", "AICc")
 names(AICc.values)<-models
@@ -193,25 +284,25 @@ print(best) #prints info on best model
 We get SE for the optima (see nodeBased.OUMV$theta) but not for the other parameters. Let's see how hard they are to estimate. 
 First, look at ?OUwie.fixed to see how to calculate likelihood at a single point.
 
-```{r, eval=FALSE}
+```{r, eval=TRUE}
 ?OUwie.fixed
 ```
 
 Next, keep all parameters but alpha at their maximum likelihood estimates (better would be to fix just alpha and let the others optimize given this constraint, but this is harder to program for this class). Try a range of alpha values and plot the likelihood against this.
 
-```{r, eval=FALSE}
-alpha.values<-seq(from= _______________ , to= _______________ , length.out=50)
+```{r, eval=TRUE}
+alpha.values<-seq(from= 0.001 , to= 0.005 , length.out=50)
 ```
 
 Keep it simple (and slow) and do a for loop:
 
-```{r, eval=FALSE}
+```{r, eval=TRUE}
 likelihood.values <- rep(NA, length(alpha.values))
-for (iteration in sequence(length(alpha.values))) {
-	likelihood.values[iteration] <- OUwie.fixed(tree, trait, model="OUMV", alpha=rep(alpha.values[iteration],2), sigma.sq=best$solution[2,], theta=best$theta[,1])$loglik
+for (i in sequence(length(alpha.values))) {
+	likelihood.values[i] <- OUwie.fixed(ult.phy.cont.tinybrlen, cont.df, model="OUMV", alpha=rep(alpha.values[i],2), sigma.sq=best$solution[2,], theta=best$theta[,1])$loglik
 }
 
-plot(x= _______________ , y= _______________, xlab="_______________", ylab="_______________", type="l", bty="n")
+plot(x= alpha.values , y= likelihood.values, xlab="ALPHA", ylab="LIK", type="l", bty="n")
 points(x=best$solution[1,1], y=best$loglik, pch=16, col="red")
 text(x=best$solution[1,1], y=best$loglik, "unconstrained best", pos=4, col="red")
 ```
