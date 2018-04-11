@@ -137,9 +137,9 @@ VisualizeData <- function(phytree, dat.mat, main.char){
 ## Clean the data 
   
 cleaned.continuous <- CleanData(ult.phy.cont, continuous.data, 1)
-cleaned.discrete <- CleanData.discrete(ult.phy.disc, num.vec.disc, 1)
-VisualizeData(ult.phy.cont, as.vector(cleaned.continuous[,1]), "Continuous_IOB")
-VisualizeData(ult.phy.disc, as.vector(cleaned.discrete[,1]), "FORAGE_POOLED")
+cleaned.discrete <- as.matrix(CleanData.discrete(ult.phy.disc, num.vec.disc, 1))
+VisualizeData(ult.phy.cont, cleaned.continuous[,1], "Continuous_IOB")
+VisualizeData(ult.phy.disc, cleaned.discrete[,1], "FORAGE_POOLED")
 
 ```
 
@@ -194,12 +194,12 @@ First, we need to assign regimes. The way we do this is with ancestral state est
 ```{r, eval=TRUE}
 
 ## get discrete species into df
-disc.species <- rownames(num.vec.disc)
+disc.species <- rownames(cleaned.continuous)
 disc.traits.conv <- as.matrix(cleaned.discrete)
 disc.traits <- `row.names<-.default`(disc.traits.conv, value = NULL)
-regime.d.v <- as.vector(c(1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,3,3,3,4,4,4,4,4,4))
+regime.v <- as.vector(c(1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,3,3,3,4,4,4,4,4,4))
 
-disc.df <-data.frame(Genus_species = row.names(disc.traits.conv), Reg = as.numeric(regime.v), x = as.numeric(disc.traits[,1]))
+disc.df <-data.frame(Genus_species = row.names(disc.species), Reg = as.numeric(regime.v), x = as.numeric(disc.traits[,1]))
 View(disc.df)
 
 
@@ -211,9 +211,9 @@ View(disc.df)
 ult.phy.disc.tinybrlen <- ult.phy.disc
 ult.phy.disc.tinybrlen$edge.length[which(ult.phy.disc.tinybrlen$edge.length==0)] <- 1e-08
 
-reconstruction.info <- ape::ace(disc.df$x, ult.phy.disc.tinybrlen, type="discrete", method="ML", CI=FALSE, model = "ER")
+reconstruction.info <- ape::ace(disc.df$x, ult.phy.disc.tinybrlen, type="d", method="ML", CI=FALSE, model = "ER", use.eigen = TRUE)
 
-# best.states <- colnames(reconstruction.info)[apply(reconstruction.info$loglik.anc, 1, which.max)]
+# best.states <- colnames(reconstruction.info)[apply(reconstruction.info$lik.anc, 1, which.max)]
 
 ```
 
@@ -236,14 +236,15 @@ View(cont.df)
 ult.phy.cont.tinybrlen <- ult.phy.cont
 ult.phy.cont.tinybrlen$edge.length[which(ult.phy.cont.tinybrlen$edge.length==0)] <- 1e-08
 
-tree.cont<-phytools::make.simmap(ult.phy.cont.tinybrlen, cont.df$x)
+# tree.cont<-phytools::make.simmap(ult.phy.cont.tinybrlen, cont.df$x)
 
-recontstruction.info.cont <- ape::ace(cont.df$x, ult.phy.cont, type = "continuous", method = "REML", CI = FALSE, model = "BM")
+recontstruction.info.cont <- ape::ace(cont.df$x, ult.phy.cont.tinybrlen, type = "continuous", method = "REML", CI = FALSE, model = "BM")
 
+# labeled.tree <- VisualizeData(ult.phy.cont.tinybrlen, recontstruction.info.cont$ace, "ACE::CONT")
 
-# labeled.tree <- ________________
-
-
+newvals <- as.vector(c(cont.traits[,1], 0, recontstruction.info.cont$ace))
+VisualizeData(ult.phy.cont, newvals, "Continuous_IOB")
+plot(density(newvals))
 
 nodeBased.OUMV <- OUwie(ult.phy.cont.tinybrlen, cont.df, model="OUMV", simmap.tree=FALSE, diagn=FALSE)
 print(nodeBased.OUMV)

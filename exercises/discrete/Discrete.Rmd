@@ -81,18 +81,18 @@ cleaned.discrete <- CleanData(phy.discrete, num.vec.disc)
 It's critically important to LOOK at what you have. Are there weird values? Has the match between taxa and state gone correctly? Do you think you have binary data, but there's actually only state 1? Especially as data sets grow (yay), and are assembled using scripts rather than by error-prone, non-reproducable hands (double yay), scientists are increasingly less likely to deeply look at our data. That's bad -- don't be that person.
 
 ```{r, eval=TRUE}
-VisualizeData <- function(data, main.char) {
+VisualizeData <- function(phy, data, main.char) {
 
   
   
-  ##phenogram(phy, data, cex = .85, edge.width = .5, spread.labels = TRUE, fsize = .45)
+  phenogram(phy, data, cex = .85, edge.width = .5, spread.labels = TRUE, fsize = .45)
    plot(density(data), main = main.char)
 }
 
 # disc.rownames <- rownames(cleaned.discrete)
 # cleaned.discrete.df <- as.data.frame(cleaned.discrete, row.names = disc.rownames, stringsAsFactors = FALSE)
 
-VisualizeData(cleaned.discrete, "cleaned.discrete")
+VisualizeData(phy.discrete, cleaned.discrete[,1], "cleaned.discrete")
 ```
 
 First, let's use parsimony to look at ancestral states:
