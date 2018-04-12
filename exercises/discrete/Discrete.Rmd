@@ -29,36 +29,80 @@ library(corHMM)
 
 You'll need to get data into R in some way. 
 
-```{r, eval=FALSE}
-tree <- read.tree("____PATH_TO_TREE_OR_SOME_OTHER_WAY_OF_GETTING_A_TREE____")
-discrete.data <- read.csv(file="____PATH_TO_DATA_OR_SOME_OTHER_WAY_OF_GETTING_TRAITS____", stringsAsFactors=FALSE) #death to factors.
+```{r, eval=TRUE}
+## tree
+
+tree.nex = read.nexus("D:/EEB 603/Trees/consensusTree_10kTrees_Primates_Version3.nex")
+phy <- multi2di(tree.nex, random=FALSE)
+
+
+##  Discrete data
+
+setwd("D:/EEB 603/Code/Run 1")
+source("Macaque Project Functions.R")
+source("Macaque Project Data Prep.R")
+
+discrete.data.raw <- read.csv("D://EEB 603/KUPRI Data/KUPRI_MAST_WITH_DISC.csv", stringsAsFactors = FALSE)
+discrete.data.prep <- as.matrix(discrete.data.raw[,6])
+discrete.data.prep <-`rownames<-`(discrete.data.prep, c("Pan_troglodytes_troglodytes", "Gorilla_gorilla_gorilla", "Hylobates_lar", "Macaca_sylvanus","Macaca_thibetana", "Macaca_mulatta", "Macaca_fascicularis", "Macaca_fuscata", "Macaca_cyclopis", "Macaca_nemestrina", "Macaca_silenus", "Macaca_pagensis", "Macaca_nigra", "Macaca_maura", "Macaca_sinica", "Macaca_radiata", "Macaca_assamensis", "Macaca_arctoides","Papio_hamadryas", "Theropithecus_gelada", "Mandrillus_sphinx", "Cercocebus_torquatus", "Cercocebus_galeritus","Erythrocebus_patas","Cercopithecus_neglectus","Cercopithecus_campbelli","Cercopithecus_petaurista"))
+discrete.factors <- factor(discrete.data.prep)
+num.vec.disc <- as.matrix(as.numeric(discrete.factors))
+num.vec.disc <-`rownames<-`(num.vec.disc, c("Pan_troglodytes_troglodytes", "Gorilla_gorilla_gorilla", "Hylobates_lar", "Macaca_sylvanus","Macaca_thibetana", "Macaca_mulatta", "Macaca_fascicularis", "Macaca_fuscata", "Macaca_cyclopis", "Macaca_nemestrina", "Macaca_silenus", "Macaca_pagensis", "Macaca_nigra", "Macaca_maura", "Macaca_sinica", "Macaca_radiata", "Macaca_assamensis", "Macaca_arctoides","Papio_hamadryas", "Theropithecus_gelada", "Mandrillus_sphinx", "Cercocebus_torquatus", "Cercocebus_galeritus","Erythrocebus_patas","Cercopithecus_neglectus","Cercopithecus_campbelli","Cercopithecus_petaurista"))
+
+  pruned.phy <-name.check(phy, num.vec.disc)
+  phy.discrete <- drop.tip(phy, pruned.phy$tree_not_data)
+
+
 ```
 
 Data are often not right in some way. They might not match the taxa in your tree, there may be missing data, etc. `geiger::treedata` is a great function for getting a tree and data that match, but your data may need other cleaning. Do it as a function so it's repeatable.
 
-```{r, eval=FALSE}
+```{r, eval=TRUE}
 CleanData <- function(phy, data) {
 	#treedata() in Geiger is probably my favorite function in R.
-}
+
+  #  Prep objects
+
+
+  
+  phy.reo <- ape::reorder.phylo(phy)
+  data.reo <- geiger::treedata(phy.reo, data, sort=TRUE)$data
+  
+
+return(data.reo)
+  }
 
 # Now write the code to use CleanData() to actually clean your data
+
+cleaned.discrete <- CleanData(phy.discrete, num.vec.disc)
 
 ```
 
 It's critically important to LOOK at what you have. Are there weird values? Has the match between taxa and state gone correctly? Do you think you have binary data, but there's actually only state 1? Especially as data sets grow (yay), and are assembled using scripts rather than by error-prone, non-reproducable hands (double yay), scientists are increasingly less likely to deeply look at our data. That's bad -- don't be that person.
 
-```{r, eval=FALSE}
-VisualizeData <- function(phy, data) {
-	#Important here is to LOOK at your data before running it. Any weird values? Does it all make sense? What about your tree? Polytomies?
-    
-    # Now write the code to use VisualizeData() to actually look at your data
+```{r, eval=TRUE}
+VisualizeData <- function(data, main.char) {
 
+  
+  
+  ##phenogram(phy, data, cex = .85, edge.width = .5, spread.labels = TRUE, fsize = .45)
+   plot(density(data), main = main.char)
 }
+
+# disc.rownames <- rownames(cleaned.discrete)
+# cleaned.discrete.df <- as.data.frame(cleaned.discrete, row.names = disc.rownames, stringsAsFactors = FALSE)
+
+VisualizeData(cleaned.discrete, "cleaned.discrete")
 ```
 
 First, let's use parsimony to look at ancestral states:
 
 ```{r, eval=FALSE}
+
+##  Brian - my data arent genotypes but factors referencing foraging behaviors in primates, so this part got a bit muddled for me
+
+
+
 cleaned.discrete.phyDat <- phangorn::phyDat(cleaned.discrete, type="______________") #phyDat is a data format used by phangorn
 anc.p <- phangorn::ancestral.pars(tree, cleaned.discrete.phyDat)
 plotAnc(tree, anc.p, 1)
