@@ -1,48 +1,52 @@
 ---
 title: "DiscreteCharacters"
 author: "Brian O'Meara"
-date: "2/16/2017"
-output: html_document
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: pdf_document
 ---
 
 For this exercise, explore looking at discrete character models. Note: they are not "discreet" character models -- they're actually pretty noisy.
 
-Remember for homework, 
+These are useful packages in this area (far from exhaustive list -- see the [CRAN task view](https://cran.r-project.org/web/views/Phylogenetics.html) for more). Rather than have to worry about do you have dependencies installed, etc. this will use the yearn package to load a package if you have it, or install and load it if you don't. In real life, you should have all the packages you need already installed and call with a `library()` call; best practices are evolving to use things like [https://rstudio.github.io/packrat/](packrat) to keep consistent package versions throughout an analysis.
 
-`git remote -v` gives list of remotes
-
-`git fetch upstream`
-
-`git pull upstream master` pulls from upstream (me).
-
-change `eval=TRUE` for all the R blocks, debug, commit, and do a pull request.
-
-These are useful packages in this area (far from exhaustive list).
+test
 
 ```{r, eval=TRUE}
+install.packages("yearn")
+yearn::yearn(ape)
+yearn::yearn(geiger)
+yearn::yearn(phytools)
+yearn::yearn(phangorn)
+yearn::yearn(corHMM)
+```
+
+You'll need to get data into R in some way. Look at other phylometh assignments for how to get trees and data.
+
+```{r, eval=TRUE}
+library(rotl)
 library(ape)
-library(geiger)
+
+tree<-read.tree('anole.tre')
 library(phytools)
-library(phangorn)
-library(corHMM)
-```
+discrete.data = read.csv(file="discreteanole.csv",stringsAsFactors = FALSE, header = FALSE)
 
-You'll need to get data into R in some way. 
+#Data are often not right in some way. They might not match the taxa in your tree, there may be missing data, etc. `geiger::treedata` is a great function for getting a tree and data that match, but your data may need other cleaning. Do it as a function so it's repeatable.
 
 ```{r, eval=FALSE}
-tree <- read.tree("____PATH_TO_TREE_OR_SOME_OTHER_WAY_OF_GETTING_A_TREE____")
-discrete.data <- read.csv(file="____PATH_TO_DATA_OR_SOME_OTHER_WAY_OF_GETTING_TRAITS____", stringsAsFactors=FALSE) #death to factors.
-```
 
-Data are often not right in some way. They might not match the taxa in your tree, there may be missing data, etc. `geiger::treedata` is a great function for getting a tree and data that match, but your data may need other cleaning. Do it as a function so it's repeatable.
+anole.vector=discrete.data[,2]
+names(anole.vector)=discrete.data[,1]
+name.check(tree,anole.vector)
 
-```{r, eval=FALSE}
 CleanData <- function(phy, data) {
 	#treedata() in Geiger is probably my favorite function in R.
 }
 
+geiger::treedata(tree,anole.vector)
+
 # Now write the code to use CleanData() to actually clean your data
 
+CleanData <- treedata(tree, anole.vector) 
 ```
 
 It's critically important to LOOK at what you have. Are there weird values? Has the match between taxa and state gone correctly? Do you think you have binary data, but there's actually only state 1? Especially as data sets grow (yay), and are assembled using scripts rather than by error-prone, non-reproducable hands (double yay), scientists are increasingly less likely to deeply look at our data. That's bad -- don't be that person.
@@ -50,38 +54,72 @@ It's critically important to LOOK at what you have. Are there weird values? Has 
 ```{r, eval=FALSE}
 VisualizeData <- function(phy, data) {
 	#Important here is to LOOK at your data before running it. Any weird values? Does it all make sense? What about your tree? Polytomies?
-    
-    # Now write the code to use VisualizeData() to actually look at your data
 
+CleanData
+  #Data makes sense; a binary state of 1 to represent ground-dwelling species and 0 for all others
+  
+tree
+  #Phylogenetic tree with 100 tips and 99 internal nodes.
+  #Tree does not have polytomies.
+  
+    # Now write the code to use VisualizeData() to actually look at your data
+VisualizeData(tree)
 }
 ```
 
 First, let's use parsimony to look at ancestral states:
 
 ```{r, eval=FALSE}
-cleaned.discrete.phyDat <- phangorn::phyDat(cleaned.discrete, type="______________") #phyDat is a data format used by phangorn
-anc.p <- phangorn::ancestral.pars(tree, cleaned.discrete.phyDat)
+
+cleaned.data.2=as.matrix(anole.vector,ncol=1)
+cleaned.phyDat=as.phyDat(cleaned.data.2,type="USER",levels=c(0,1))
+anc.p <- phangorn::ancestral.pars(tree, cleaned.phyDat)
 plotAnc(tree, anc.p, 1)
 ```
 
 Do you see uncertainty? What does it mean?
+#No, but I'll take that with a grain of salt given the small sample size and phylogenetic distance between ground-dwelling Anoles.
+#The lack of uncertainty is a consequence of parsimony analysis.
 
-Now, plot the likelihood estimates. 
+Now, plot the likelihood estimates.
 
 ```{r, eval=FALSE}
-anc.ml <- ancestral.pml(pml(tree, cleaned.discrete.phyDat), type="ml")
+anc.ml <- ancestral.pml(pml(tree, cleaned.phyDat), type="ml")
 plotAnc(tree, anc.ml, 1)
 ```
 
-How does this differ from parsimony? 
+How does this differ from parsimony?
+Parsimony only tells us the ideal model based on which involves the least amount of state changes. Maximum Likelihood gives us the most likely model based on the data.
 
 Why does it differ from parsimony?
+It departs from the classic scheme of Occam's Razor and generates more complex (and often more accurate) models because of it. There is more uncertainty here, but that gives us a better look at the data.
 
 What does uncertainty mean?
+Uncertainty here represents a lack of information about ancestral nodes.
 
-Now, to the biological questions. For many of these, `corHMM` will be a useful package.
+Now, to the biological questions. For many of these, `corHMM` will be a useful package. Do the following analyses:
+
 
 1. How can you estimate transition rates between states? Do it.
-2. How could you examine if transition rates are equal?
-3. Think about the Lewis (2001) MKV model. Are your traits all variable? Will using this make sense for your data? Try using it. Do results change?
-4. How could you test order of state evolution?
+```{r,eval=TRUE}
+library(corHMM)
+
+newdataframe=data.frame(taxon=names(anole.vector),trait=unlist(anole.vector),stringsAsFactors=FALSE)
+cor.dat=corHMM(tree,newdataframe,rate.cat=2,node.states="none")
+
+
+#2. How could you examine if transition rates are equal?
+
+plot(cor.dat)
+
+#3. Think about the Lewis (2001) MKV model. Are your traits all variable? Will using this make sense for your data? Try using it. Do results change?
+
+Lewismodel=lewisMkv(tree,newdataframe)
+
+
+#4. How could you test order of state evolution?
+
+x0=corHMM(tree,newdataframe,rate.cat=2,node.states="none",root.p=1)
+x1=corHMM(tree,newdataframe,rate.cat=2,node.states="none",root.=0)
+
+```
