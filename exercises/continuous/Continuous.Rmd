@@ -11,46 +11,58 @@ First get packages we need
 library(ape) #utility fns
 library(geiger) #utilty fns
 library(OUwie)
+library(phytools)
 ```
 
 Now get the tree and data. For these exercises, knowing uncertainty in your measurements can also be important. (remember for homework to change `eval=FALSE` to `eval=TRUE`).
 
 ```{r, eval=FALSE}
-tree <- read.tree("____PATH_TO_TREE_OR_SOME_OTHER_WAY_OF_GETTING_A_TREE____")
-continuous.data <- read.csv(file="____PATH_TO_DATA_OR_SOME_OTHER_WAY_OF_GETTING_TRAITS____", stringsAsFactors=FALSE) #death to factors.
+anole.tree <- read.tree("anole.tre")
+anole.csv <- read.csv(file="anole.csv", stringsAsFactors=FALSE) #death to factors.
 ```
 
 A function to clean data, make sure taxon names match between tree and data, etc. 
 
 ```{r, eval=FALSE}
-CleanData <- function(phy, data) {
-	#treedata() in Geiger is probably my favorite function in R.
-}
+CleanData <- function(anole.tree, anole.csv) 
+  cleanedsvl.csv=anole.csv$svl
+  names(cleanedsvl.csv)=anole.csv$species
+  cleanedlogsvl.csv=log(cleanedsvl.csv)
+treedata(anole.tree,cleanedlogsvl.csv)
+  
+#treedata() in Geiger is probably my favorite function in R.
+
 ```
 
 A function to plot data. Look at `phytools::contMap()`. This is all part of checking: do your data all seem sensible? **LOOK AT IT**.
 
 ```{r, eval=FALSE}
-VisualizeData <- function(phy, data) {
+VisualizeData <- function(anole.tree, anole.csv) {
+  
+  phytools::contMap(anole.tree, cleanedsvl.csv)
+  
 	#Important here is to LOOK at your data before running it. Any weird values? Does it all make sense? What about your tree? Polytomies?
 }
+
 ```
 
 First, start basic. What is the rate of evolution of your trait on the tree? 
 
 ```{r, eval=FALSE}
-BM1 <- geiger::fitContinuous(tree, cleaned.continuous, model="BM")
-print(paste("The rate of evolution is", _____, "in units of", _______))
+BM1 <- geiger::fitContinuous(anole.tree, cleanedsvl.csv, model="BM")
+print(paste("The rate of evolution is", #0.136160, "in units of", #log mm^2 over tree length (one))
 ```
 
 Important: What are the rates of evolution? In what units?
+The rate of evolution is 0.136160 in units of log millimeters^2 over one, which is the height of the tree.
 
 
 ```{r, eval=FALSE}
-OU1 <- fitContinuous(tree, cleaned.continuous, model="OU")
-par(mfcol(c(1,2)))
-plot(tree, show.tip.label=FALSE)
-ou.tree <- rescale(tree, model="OU", ___alpha____)
+OU1 <- fitContinuous(anole.tree, cleanedsvl.csv, model="OU")
+library(Matrix)
+par(mfcol=(c(1,2)))
+plot(anole.tree, show.tip.label=FALSE)
+ou.tree <- rescale(anole.tree, model="OU", OU1$alpha)
 plot(ou.tree)
 ```
 
@@ -59,10 +71,11 @@ How are the trees different?
 Compare trees
 
 ```{r, eval=FALSE}
-AIC.BM1 <- ________FIGURE_OUT_HOW_TO_DO_THIS_____
-AIC.OU1 <- ________FIGURE_OUT_HOW_TO_DO_THIS_____
-delta.AIC.BM1 <- ________FIGURE_OUT_HOW_TO_DO_THIS_____
-delta.AIC.OU1 <- ________FIGURE_OUT_HOW_TO_DO_THIS_____
+AIC.BM1 <- BM1$opt$aic
+AIC.OU1 <- OU1$opt$aic
+BestAIC=min(AIC.BM1, AIC.OU1)
+delta.AIC.BM1 <- AIC.BM1 - BestAIC
+delta.AIC.OU1 <- AIC.OU1 - BestAIC
 ```
 
 
@@ -75,16 +88,28 @@ We're a bit obsessive about doing multiple starts and in general performing a th
 First, we need to assign regimes. The way we do this is with ancestral state estimation of a discrete trait. We can do this using ace() in ape, or similar functions in corHMM or diversitree. Use only one discrete char.
 
 ```{r, eval=FALSE}
-one.discrete.char <- _____________
-reconstruction.info <- ace(one.discrete.char, tree, type="discrete", method="ML", CI=TRUE)
+
+one.discrete.char <- as.integer(cleanedsvl.csv*0)
+names(one.discrete.char) <- names(cleanedsvl.csv)
+one.discrete.char['sagrei'] <- 1
+one.discrete.char['cybotes'] = 1
+one.discrete.char['cristatellus'] = 1
+one.discrete.char['lineatopus'] = 1
+
+reconstruction.info <- ace(one.discrete.char, anole.tree, type="discrete", method="ML", CI=TRUE)
 best.states <- colnames(reconstruction.info$lik.anc)[apply(reconstruction.info$lik.anc, 1, which.max)]
 ```
 
 Now add these labels to your tree.
 
 ```{r, eval=FALSE}
-labeled.tree <- ________________
-nodeBased.OUMV <- OUwie(tree, cleaned.continuous,model="OUMV", simmap.tree=FALSE, diagn=FALSE)
+labeled.tree <- plotBranchbyTrait(anole.tree, one.discrete.char, mode="tips", palette = "rainbow", legend=TRUE, xlims=NULL)
+discplot=ace(one.discrete.char, anole.tree, type = "d")
+plot(anole.tree, type = "c", FALSE, label.offset=1, cex=0.8)
+color=c("black", "red")
+plot.new(tiplabels(pch=22, bg=color[1+as.numeric(one.discrete.char)], cex = .5, adj = 1))
+nodelabels(thermo = discplot$lik.anc, piecol = color, cex = 0.75)
+nodeBased.OUMV <- OUwie(tree, cleanedsvl.csv,model="OUMV", simmap.tree=FALSE, diagn=FALSE)
 print(nodeBased.OUMV)
 ```
 
